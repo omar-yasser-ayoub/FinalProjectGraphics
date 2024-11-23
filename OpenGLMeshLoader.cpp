@@ -2,6 +2,7 @@
 #include "Model_3DS.h"
 #include "GLTexture.h"
 #include <glut.h>
+#include <math.h>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
@@ -10,7 +11,7 @@ GLuint tex;
 char title[] = "3D Model Loader Sample";
 
 // 3D Projection Options
-GLdouble fovy = 45.0;
+GLdouble fovy = 90.0;
 GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 100;
@@ -33,8 +34,8 @@ public:
 	}
 };
 
-Vector Eye(20, 5, 20);
-Vector At(0, 0, 0);
+Vector Eye(0, 2, 0);
+Vector At(5, 2, 5);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -45,6 +46,23 @@ Model_3DS model_tree;
 
 // Textures
 GLTexture tex_ground;
+
+enum mode {
+	FIRST_PERSON,
+	THIRD_PERSON,
+};
+
+bool mouseEnabled = true;
+float sensitivity = 0.2f;
+float yaw = -90.0f;
+float pitch = 0.0f;
+int lastX = WIDTH / 2;
+int lastY = HEIGHT / 2;
+mode currentMode = FIRST_PERSON;
+
+float radians(float degrees) {
+	return degrees * 3.14159f / 180.0f;
+}
 
 //=======================================================================
 // Lighting Configuration Function
@@ -145,12 +163,12 @@ void RenderGround()
 
 	glEnable(GL_TEXTURE_2D);	// Enable 2D texturing
 
-	//glBindTexture(GL_TEXTURE_2D, tex_ground.texture[0]);	// Bind the ground texture
+	glBindTexture(GL_TEXTURE_2D, tex_ground.texture[0]);	// Bind the ground texture
 
 	glPushMatrix();
 	glBegin(GL_QUADS);
 	glNormal3f(0, 1, 0);	// Set quad normal direction.
-	//glTexCoord2f(0, 0);		// Set tex coordinates ( Using (0,0) -> (5,5) with texture wrapping set to GL_REPEAT to simulate the ground repeated grass texture).
+	glTexCoord2f(0, 0);		// Set tex coordinates ( Using (0,0) -> (5,5) with texture wrapping set to GL_REPEAT to simulate the ground repeated grass texture).
 	glVertex3f(-20, 0, -20);
 	glTexCoord2f(5, 0);
 	glVertex3f(20, 0, -20);
@@ -221,10 +239,20 @@ void myKeyboard(unsigned char button, int x, int y)
 {
 	switch (button)
 	{
+	case 27: // ESC key
+		mouseEnabled = !mouseEnabled;
+		if (mouseEnabled) {
+			glutSetCursor(GLUT_CURSOR_NONE);  // Hide cursor
+			glutWarpPointer(WIDTH / 2, HEIGHT / 2);
+		}
+		else {
+			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);  // Show cursor
+		}
+		break;
+		// ... your other keyboard controls ...
 	default:
 		break;
 	}
-
 	glutPostRedisplay();
 }
 
@@ -233,29 +261,31 @@ void myKeyboard(unsigned char button, int x, int y)
 //=======================================================================
 void myMotion(int x, int y)
 {
-	y = HEIGHT - y;
+	if (!mouseEnabled) return;
 
-	if (cameraZoom - y > 0)
-	{
-		Eye.x += -0.1;
-		Eye.z += -0.1;
-	}
-	else
-	{
-		Eye.x += 0.1;
-		Eye.z += 0.1;
-	}
+	float xoffset = (x - WIDTH / 2) * sensitivity;
+	float yoffset = (HEIGHT / 2 - y) * sensitivity;  // Reversed since y-coordinates range from bottom to top
 
-	cameraZoom = y;
+	// Reset mouse position to center
+	glutWarpPointer(WIDTH / 2, HEIGHT / 2);
 
-	glLoadIdentity();	//Clear Model_View Matrix
+	// Update camera angles
+	yaw += xoffset;
+	pitch += yoffset;
 
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	// Constrain pitch
+	if (pitch > 89.0f) pitch = 89.0f;
+	if (pitch < -89.0f) pitch = -89.0f;
 
-	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	// Calculate new camera direction
+	At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+	At.y = Eye.y + sin(radians(pitch));
+	At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
 
-	glutPostRedisplay();	//Re-draw scene 
+	// Update the view
+	glLoadIdentity();
+	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	glutPostRedisplay();
 }
 
 //=======================================================================
@@ -263,12 +293,7 @@ void myMotion(int x, int y)
 //=======================================================================
 void myMouse(int button, int state, int x, int y)
 {
-	y = HEIGHT - y;
-
-	if (state == GLUT_DOWN)
-	{
-		cameraZoom = y;
-	}
+	
 }
 
 //=======================================================================
@@ -307,7 +332,7 @@ void LoadAssets()
 	//model_tree.Load("Models/tree/Tree1.3ds");
 
 	//// Loading texture files
-	//tex_ground.Load("Textures/ground.bmp");
+	tex_ground.Load("Textures/ground.bmp");
 	//loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
 
@@ -330,11 +355,11 @@ void main(int argc, char** argv)
 
 	glutKeyboardFunc(myKeyboard);
 
-	glutMotionFunc(myMotion);
-
 	glutMouseFunc(myMouse);
 
 	glutReshapeFunc(myReshape);
+
+	glutPassiveMotionFunc(myMotion);
 
 	myInit();
 
