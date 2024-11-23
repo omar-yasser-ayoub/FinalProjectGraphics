@@ -242,14 +242,13 @@ void myKeyboard(unsigned char button, int x, int y)
 	case 27: // ESC key
 		mouseEnabled = !mouseEnabled;
 		if (mouseEnabled) {
-			glutSetCursor(GLUT_CURSOR_NONE);  // Hide cursor
+			glutSetCursor(GLUT_CURSOR_NONE);
 			glutWarpPointer(WIDTH / 2, HEIGHT / 2);
 		}
 		else {
-			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);  // Show cursor
+			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 		}
 		break;
-		// ... your other keyboard controls ...
 	default:
 		break;
 	}
@@ -264,7 +263,7 @@ void myMotion(int x, int y)
 	if (!mouseEnabled) return;
 
 	float xoffset = (x - WIDTH / 2) * sensitivity;
-	float yoffset = (HEIGHT / 2 - y) * sensitivity;  // Reversed since y-coordinates range from bottom to top
+	float yoffset = (HEIGHT / 2 - y) * sensitivity;
 
 	// Reset mouse position to center
 	glutWarpPointer(WIDTH / 2, HEIGHT / 2);
