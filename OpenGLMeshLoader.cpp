@@ -34,15 +34,14 @@ public:
 	}
 };
 
-Vector Eye(0, 2, 0);
+Vector Eye(5, 2, 5);
 Vector At(5, 2, 5);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
 
 // Model Variables
-Model_3DS model_house;
-Model_3DS model_tree;
+Model_3DS model_player;
 
 // Textures
 GLTexture tex_ground;
@@ -201,6 +200,7 @@ void myDisplay(void)
 	// Draw Ground
 	RenderGround();
 
+	model_player.Draw();
 	//// Draw Tree Model
 	//glPushMatrix();
 	//glTranslatef(10, 0, 0);
@@ -327,6 +327,7 @@ void myReshape(int w, int h)
 void LoadAssets()
 {
 	//// Loading Model files
+	model_player.Load("Models/Scene1/Planks/planks.3ds");
 	//model_house.Load("Models/house/house.3DS");
 	//model_tree.Load("Models/tree/Tree1.3ds");
 
@@ -361,7 +362,6 @@ void main(int argc, char** argv)
 	glutPassiveMotionFunc(myMotion);
 
 	myInit();
-
 	LoadAssets();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
