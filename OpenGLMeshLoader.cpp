@@ -14,7 +14,7 @@ char title[] = "3D Model Loader Sample";
 GLdouble fovy = 90.0;
 GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
-GLdouble zFar = 100;
+GLdouble zFar = 250;
 
 class Vector
 {
@@ -34,7 +34,7 @@ public:
 	}
 };
 
-Vector Eye(0, 5, 0);
+Vector Eye(0, 15, 0);
 Vector At(0, 5, 0);
 Vector Up(0, 1, 0);
 
@@ -268,8 +268,8 @@ void myDisplay(void)
 
 	// Draw Car Model
 	glPushMatrix();
-	glTranslatef(0, 0, 5);
-	glScalef(0.1, 0.1, 0.1);
+	glTranslatef(-3, 0, -5);
+	glScalef(7, 7, 7);
 	model_car.Draw();
 	glPopMatrix();
 
@@ -298,19 +298,19 @@ void myDisplay(void)
 
 
 	//sky box
-	//glPushMatrix();
+	glPushMatrix();
 
-	//GLUquadricObj* qobj;
-	//qobj = gluNewQuadric();
-	//glTranslated(50, 0, 0);
-	//glRotated(90, 1, 0, 1);
-	//glBindTexture(GL_TEXTURE_2D, tex);
-	//gluQuadricTexture(qobj, true);
-	//gluQuadricNormals(qobj, GL_SMOOTH);
-	//gluSphere(qobj, 100, 100, 100);
-	//gluDeleteQuadric(qobj);
+	GLUquadricObj* qobj;
+	qobj = gluNewQuadric();
+	glTranslated(50, 0, 0);
+	glRotated(90, 1, 0, 1);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	gluQuadricTexture(qobj, true);
+	gluQuadricNormals(qobj, GL_SMOOTH);
+	gluSphere(qobj, 200, 100, 100);
+	gluDeleteQuadric(qobj);
 
-	//glPopMatrix();
+	glPopMatrix();
 
 	glutSwapBuffers();
 }
@@ -425,7 +425,7 @@ void LoadAssets()
 
 	//// Loading texture files
 	tex_ground.Load("Textures/ground.bmp");
-	//loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
+	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
 
 //=======================================================================
