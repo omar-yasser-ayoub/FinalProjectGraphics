@@ -34,8 +34,8 @@ public:
 	}
 };
 
-Vector Eye(5, 2, 5);
-Vector At(0, 2, 5);
+Vector Eye(0, 5, 0);
+Vector At(0, 5, 0);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -48,6 +48,7 @@ Model_3DS model_crate3;
 Model_3DS model_car;
 Model_3DS model_enemy;
 Model_3DS model_bench;
+Model_3DS model_map;
 
 
 
@@ -206,7 +207,7 @@ void myDisplay(void)
 	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
 
 	// Draw Ground
-	RenderGround();
+	//RenderGround();
 
 	// Draw Player Model
 	glPushMatrix();
@@ -218,22 +219,44 @@ void myDisplay(void)
 
 	// Draw Crate Model
 	glPushMatrix();
-	glTranslatef(0, 0, -10);
+	glTranslatef(5, 0, 10);
 	glScalef(0.25, 0.25, 0.25);
 	model_crate1.Draw();
 	glPopMatrix();
 
 	// Draw Crate Model
 	glPushMatrix();
-	glTranslatef(0, 0, -5);
+	glTranslatef(5, 0, -10);
 	glRotatef(90, 1, 0, 0);
-	glScalef(0.05, 0.05, 0.05);
+	glScalef(0.075, 0.075, 0.075);
 	model_crate2.Draw();
 	glPopMatrix();
 
 	// Draw Crate Model
 	glPushMatrix();
-	glTranslatef(0, 0, 0);
+	glTranslatef(15, 0, -10);
+	glRotatef(90, 1, 0, 0);
+	glScalef(0.075, 0.075, 0.075);
+	model_crate2.Draw();
+	glPopMatrix();
+
+
+	//SIDE 2
+
+	// Draw Crate Model
+	glPushMatrix();
+	glTranslatef(5, 0, 5);
+	glRotatef(-90, 1, 0, 0);
+	glScalef(0.5, 0.5, 0.5);
+	glPushMatrix();
+	glRotatef(90, 0, 0, 1);
+	model_crate3.Draw();
+	glPopMatrix();
+	glPopMatrix();
+
+	// Draw Crate Model
+	glPushMatrix();
+	glTranslatef(15, 0, 5);
 	glRotatef(-90, 1, 0, 0);
 	glScalef(0.5, 0.5, 0.5);
 	glPushMatrix();
@@ -264,6 +287,12 @@ void myDisplay(void)
 	model_bench.Draw();
 	glPopMatrix();
 
+	// Draw Map Model
+	glPushMatrix();
+	glTranslatef(5, 0, 5);
+	glScalef(3.0, 3.0, 3.0);
+	model_map.Draw();
+	glPopMatrix();
 
 
 	//sky box
@@ -301,6 +330,9 @@ void myKeyboard(unsigned char button, int x, int y)
 			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 		}
 		break;
+	case 'f':
+		glutReshapeWindow(800, 600); // Set the window size
+		glutPositionWindow(100, 100); // Position the window
 	default:
 		break;
 	}
@@ -386,6 +418,7 @@ void LoadAssets()
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
 	model_player.Load("Models/Scene2/Player/player.3ds");
+	model_map.Load("Models/Scene2/Map/map.3ds");
 
 	//// Loading texture files
 	tex_ground.Load("Textures/ground.bmp");
