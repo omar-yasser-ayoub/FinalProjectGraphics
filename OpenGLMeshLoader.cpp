@@ -75,52 +75,52 @@ float radians(float degrees) {
 //=======================================================================
 // Lighting Configuration Function
 //=======================================================================
-//void InitLightSource()
-//{
-//	// Enable Lighting for this OpenGL Program
-//	glEnable(GL_LIGHTING);
-//
-//	// Enable Light Source number 0
-//	// OpengL has 8 light sources
-//	glEnable(GL_LIGHT0);
-//
-//	// Define Light source 0 ambient light
-//	GLfloat ambient[] = { 0.1f, 0.1f, 0.1, 1.0f };
-//	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-//
-//	// Define Light source 0 diffuse light
-//	GLfloat diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-//	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-//
-//	// Define Light source 0 Specular light
-//	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-//	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-//
-//	// Finally, define light source 0 position in World Space
-//	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-//	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-//}
+void InitLightSource()
+{
+	// Enable Lighting for this OpenGL Program
+	glEnable(GL_LIGHTING);
+
+	// Enable Light Source number 0
+	// OpengL has 8 light sources
+	glEnable(GL_LIGHT0);
+
+	// Define Light source 0 ambient light
+	GLfloat ambient[] = { 0.2f, 0.2f, 0.2, 1.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+
+	// Define Light source 0 diffuse light
+	GLfloat diffuse[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+
+	// Define Light source 0 Specular light
+	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+
+	// Finally, define light source 0 position in World Space
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+}
 
 //=======================================================================
 // Material Configuration Function
 //======================================================================
-//void InitMaterial()
-//{
-//	// Enable Material Tracking
-//	glEnable(GL_COLOR_MATERIAL);
-//
-//	// Sich will be assigneet Material Properties whd by glColor
-//	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-//
-//	// Set Material's Specular Color
-//	// Will be applied to all objects
-//	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-//	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-//
-//	// Set Material's Shine value (0->128)
-//	GLfloat shininess[] = { 96.0f };
-//	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-//}
+void InitMaterial()
+{
+	// Enable Material Tracking
+	glEnable(GL_COLOR_MATERIAL);
+
+	// Sich will be assigneet Material Properties whd by glColor
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	// Set Material's Specular Color
+	// Will be applied to all objects
+	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+
+	// Set Material's Shine value (0->128)
+	GLfloat shininess[] = { 96.0f };
+	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+}
 
 //=======================================================================
 // OpengGL Configuration Function
@@ -151,9 +151,9 @@ void myInit(void)
 	// UP (ux, uy, uz):  denotes the upward orientation of the camera.							 //
 	//*******************************************************************************************//
 
-	//InitLightSource();
+	InitLightSource();
 
-	//InitMaterial();
+	InitMaterial();
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -419,8 +419,9 @@ void LoadAssets()
 	model_crate3.Load("Models/Scene2/crate3/crate.3ds");
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
-	model_player.Load("Models/Scene2/Player/player.3ds");
+	model_player.Load("Models/Scene2/Player/player2.3ds");
 	model_map.Load("Models/Scene2/Map/map.3ds");
+
 
 	//// Loading texture files
 	tex_ground.Load("Textures/ground.bmp");
