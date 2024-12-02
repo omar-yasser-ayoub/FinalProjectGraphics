@@ -199,8 +199,10 @@ void myDisplay(void)
 
 	// Draw Ground
 	RenderGround();
-
+	glPushMatrix();
+	glScalef(0.5, 0.5, 0.5);
 	model_player.Draw();
+	glPopMatrix();
 	//// Draw Tree Model
 	//glPushMatrix();
 	//glTranslatef(10, 0, 0);
@@ -327,7 +329,7 @@ void myReshape(int w, int h)
 void LoadAssets()
 {
 	//// Loading Model files
-	model_player.Load("Models/Scene1/Planks/planks.3ds");
+	model_player.Load("Models/Scene1/Bench/bench.3ds");
 	//model_house.Load("Models/house/house.3DS");
 	//model_tree.Load("Models/tree/Tree1.3ds");
 
