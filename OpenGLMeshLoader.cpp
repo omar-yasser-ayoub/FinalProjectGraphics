@@ -217,10 +217,12 @@ void myDisplay(void)
 	model_player.Draw();
 	glPopMatrix();
 
+	//SIDE 1
+
 	// Draw Crate Model
 	glPushMatrix();
-	glTranslatef(5, 0, 10);
-	glScalef(0.25, 0.25, 0.25);
+	glTranslatef(25, 0, 0);
+	glScalef(0.5, 0.5, 0.5);
 	model_crate1.Draw();
 	glPopMatrix();
 
@@ -282,7 +284,8 @@ void myDisplay(void)
 
 	// Draw Bench Model
 	glPushMatrix();
-	glTranslatef(0, 0, 15);
+	glTranslatef(8, 0, 17);
+	glRotatef(180, 0, 1, 0);
 	glScalef(0.01, 0.01, 0.01);
 	model_bench.Draw();
 	glPopMatrix();
