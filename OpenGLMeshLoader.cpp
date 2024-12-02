@@ -3,7 +3,6 @@
 #include "GLTexture.h"
 #include <glut.h>
 #include <math.h>
-#include <cmath>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
@@ -21,33 +20,12 @@ class Vector
 {
 public:
 	GLdouble x, y, z;
-	Vector() : x(0), y(0), z(0) {}
+	Vector() {}
 	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-
-	// Addition operator
-	Vector operator+(const Vector& other) const {
-		return Vector(x + other.x, y + other.y, z + other.z);
-	}
-
-	// Subtraction operator
-	Vector operator-(const Vector& other) const {
-		return Vector(x - other.x, y - other.y, z - other.z);
-	}
-
-	// Scalar multiplication
-	Vector operator*(float scalar) const {
-		return Vector(x * scalar, y * scalar, z * scalar);
-	}
-
-	// Normalize vector
-	Vector normalize() const {
-		float length = sqrt(x * x + y * y + z * z);
-		if (length > 0) {
-			return Vector(x / length, y / length, z / length);
-		}
-		return *this;
-	}
-
+	//================================================================================================//
+	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
+	// Here we are overloading the += operator to add a given value to all vector coordinates.        //
+	//================================================================================================//
 	void operator +=(float value)
 	{
 		x += value;
@@ -56,7 +34,7 @@ public:
 	}
 };
 
-Vector Eye(0, 2, 0);
+Vector Eye(5, 2, 5);
 Vector At(0, 2, 5);
 Vector Up(0, 1, 0);
 
@@ -143,74 +121,6 @@ float radians(float degrees) {
 //	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 //}
 
-class Player {
-public:
-	Vector position;
-	float speed = 0.1f;
-	float height = 2.0f;  // Player height for camera positioning
-
-	void moveForward() {
-		Vector direction = At - Eye;
-		direction.y = 0;  // Keep the movement horizontal
-		direction = direction.normalize();  // Normalize the direction
-
-		position.x += direction.x * speed;
-		position.z += direction.z * speed;
-	}
-
-	void moveBackward() {
-		Vector direction = Eye - At;  // Reverse direction for moving backward
-		direction.y = 0;  // Keep the movement horizontal
-		direction = direction.normalize();  // Normalize the direction
-
-		position.x += direction.x * speed;
-		position.z += direction.z * speed;
-	}
-
-	void moveLeft() {
-		Vector direction = At - Eye;
-		Vector left(-direction.z, 0, direction.x);  // Calculate the left direction
-		left = left.normalize();  // Normalize the left direction
-
-		position.x += left.x * speed;
-		position.z += left.z * speed;
-	}
-
-	void moveRight() {
-		Vector direction = At - Eye;
-		Vector right(direction.z, 0, -direction.x);  // Calculate the right direction
-		right = right.normalize();  // Normalize the right direction
-
-		position.x += right.x * speed;
-		position.z += right.z * speed;
-	}
-
-	void updateCamera(mode currentMode) {
-		if (currentMode == FIRST_PERSON) {
-			Eye.x = position.x;
-			Eye.y = position.y + height;
-			Eye.z = position.z;
-
-			// Adjust the `At` position based on yaw and pitch
-			At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
-			At.y = Eye.y + sin(radians(pitch));
-			At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
-		}
-		else if (currentMode == THIRD_PERSON) {
-			// Camera positioned behind the player
-			Vector direction = At - Eye;
-			direction.y = 0;
-			direction = direction.normalize();
-
-			Eye.x = position.x - direction.x * 5;
-			Eye.y = position.y + height + 2;
-			Eye.z = position.z - direction.z * 5;
-		}
-	}
-};
-
-Player player;
-
 //=======================================================================
 // OpengGL Configuration Function
 //=======================================================================
@@ -295,18 +205,11 @@ void myDisplay(void)
 	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
 
-	// Update camera position and direction
-	player.updateCamera(currentMode);
-
-	// Set up the camera view
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
-
 	// Draw Ground
 	RenderGround();
 
 	// Draw Player Model
 	glPushMatrix();
-	glTranslatef(player.position.x, player.position.y, player.position.z);
 	glScalef(2, 2, 2);
 	glTranslatef(0, 0, 2.5);
 	glRotatef(90, 1, 0, 0);
@@ -338,7 +241,7 @@ void myDisplay(void)
 	model_crate3.Draw();
 	glPopMatrix();
 	glPopMatrix();
-	
+
 	// Draw Car Model
 	glPushMatrix();
 	glTranslatef(0, 0, 5);
@@ -388,26 +291,6 @@ void myKeyboard(unsigned char button, int x, int y)
 {
 	switch (button)
 	{
-	case 'w':
-	case 'W':
-		player.moveForward();
-		break;
-	case 's':
-	case 'S':
-		player.moveBackward();
-		break;
-	case 'a':
-	case 'A':
-		player.moveLeft();
-		break;
-	case 'd':
-	case 'D':
-		player.moveRight();
-		break;
-	case 't':  // Toggle between first and third-person
-	case 'T':
-		currentMode = (currentMode == FIRST_PERSON) ? THIRD_PERSON : FIRST_PERSON;
-		break;
 	case 27: // ESC key
 		mouseEnabled = !mouseEnabled;
 		if (mouseEnabled) {
@@ -418,10 +301,9 @@ void myKeyboard(unsigned char button, int x, int y)
 			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 		}
 		break;
+	default:
+		break;
 	}
-
-	// Update camera based on current mode
-	player.updateCamera(currentMode);
 	glutPostRedisplay();
 }
 
@@ -430,19 +312,31 @@ void myKeyboard(unsigned char button, int x, int y)
 //=======================================================================
 void myMotion(int x, int y)
 {
-	if (mouseEnabled) {
-		float dx = x - lastX;
-		float dy = y - lastY;
+	if (!mouseEnabled) return;
 
-		yaw += dx * sensitivity;  // Adjust horizontal rotation
-		pitch -= dy * sensitivity;  // Adjust vertical rotation (up and down)
+	float xoffset = (x - WIDTH / 2) * sensitivity;
+	float yoffset = (HEIGHT / 2 - y) * sensitivity;
 
-		if (pitch > 89.0f) pitch = 89.0f;
-		if (pitch < -89.0f) pitch = -89.0f;
+	// Reset mouse position to center
+	glutWarpPointer(WIDTH / 2, HEIGHT / 2);
 
-		lastX = x;
-		lastY = y;
-	}
+	// Update camera angles
+	yaw += xoffset;
+	pitch += yoffset;
+
+	// Constrain pitch
+	if (pitch > 89.0f) pitch = 89.0f;
+	if (pitch < -89.0f) pitch = -89.0f;
+
+	// Calculate new camera direction
+	At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+	At.y = Eye.y + sin(radians(pitch));
+	At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+
+	// Update the view
+	glLoadIdentity();
+	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	glutPostRedisplay();
 }
 
 //=======================================================================
@@ -450,7 +344,7 @@ void myMotion(int x, int y)
 //=======================================================================
 void myMouse(int button, int state, int x, int y)
 {
-	
+
 }
 
 //=======================================================================
