@@ -242,7 +242,6 @@ void myDisplay(void)
 	model_crate2.Draw();
 	glPopMatrix();
 
-
 	//SIDE 2
 
 	// Draw Crate Model
