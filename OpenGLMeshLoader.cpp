@@ -3,6 +3,7 @@
 #include "GLTexture.h"
 #include <glut.h>
 #include <math.h>
+#include <cmath>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
@@ -20,12 +21,33 @@ class Vector
 {
 public:
 	GLdouble x, y, z;
-	Vector() {}
+	Vector() : x(0), y(0), z(0) {}
 	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-	//================================================================================================//
-	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
-	// Here we are overloading the += operator to add a given value to all vector coordinates.        //
-	//================================================================================================//
+
+	// Addition operator
+	Vector operator+(const Vector& other) const {
+		return Vector(x + other.x, y + other.y, z + other.z);
+	}
+
+	// Subtraction operator
+	Vector operator-(const Vector& other) const {
+		return Vector(x - other.x, y - other.y, z - other.z);
+	}
+
+	// Scalar multiplication
+	Vector operator*(float scalar) const {
+		return Vector(x * scalar, y * scalar, z * scalar);
+	}
+
+	// Normalize vector
+	Vector normalize() const {
+		float length = sqrt(x * x + y * y + z * z);
+		if (length > 0) {
+			return Vector(x / length, y / length, z / length);
+		}
+		return *this;
+	}
+
 	void operator +=(float value)
 	{
 		x += value;
@@ -34,14 +56,22 @@ public:
 	}
 };
 
-Vector Eye(5, 2, 5);
-Vector At(5, 2, 5);
+Vector Eye(0, 2, 0);
+Vector At(0, 2, 5);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
 
 // Model Variables
 Model_3DS model_player;
+Model_3DS model_crate1;
+Model_3DS model_crate2;
+Model_3DS model_crate3;
+Model_3DS model_car;
+Model_3DS model_enemy;
+Model_3DS model_bench;
+
+
 
 // Textures
 GLTexture tex_ground;
@@ -112,6 +142,74 @@ float radians(float degrees) {
 //	GLfloat shininess[] = { 96.0f };
 //	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 //}
+
+class Player {
+public:
+	Vector position;
+	float speed = 0.1f;
+	float height = 2.0f;  // Player height for camera positioning
+
+	void moveForward() {
+		Vector direction = At - Eye;
+		direction.y = 0;  // Keep the movement horizontal
+		direction = direction.normalize();  // Normalize the direction
+
+		position.x += direction.x * speed;
+		position.z += direction.z * speed;
+	}
+
+	void moveBackward() {
+		Vector direction = Eye - At;  // Reverse direction for moving backward
+		direction.y = 0;  // Keep the movement horizontal
+		direction = direction.normalize();  // Normalize the direction
+
+		position.x += direction.x * speed;
+		position.z += direction.z * speed;
+	}
+
+	void moveLeft() {
+		Vector direction = At - Eye;
+		Vector left(-direction.z, 0, direction.x);  // Calculate the left direction
+		left = left.normalize();  // Normalize the left direction
+
+		position.x += left.x * speed;
+		position.z += left.z * speed;
+	}
+
+	void moveRight() {
+		Vector direction = At - Eye;
+		Vector right(direction.z, 0, -direction.x);  // Calculate the right direction
+		right = right.normalize();  // Normalize the right direction
+
+		position.x += right.x * speed;
+		position.z += right.z * speed;
+	}
+
+	void updateCamera(mode currentMode) {
+		if (currentMode == FIRST_PERSON) {
+			Eye.x = position.x;
+			Eye.y = position.y + height;
+			Eye.z = position.z;
+
+			// Adjust the `At` position based on yaw and pitch
+			At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+			At.y = Eye.y + sin(radians(pitch));
+			At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+		}
+		else if (currentMode == THIRD_PERSON) {
+			// Camera positioned behind the player
+			Vector direction = At - Eye;
+			direction.y = 0;
+			direction = direction.normalize();
+
+			Eye.x = position.x - direction.x * 5;
+			Eye.y = position.y + height + 2;
+			Eye.z = position.z - direction.z * 5;
+		}
+	}
+};
+
+Player player;
 
 //=======================================================================
 // OpengGL Configuration Function
@@ -197,24 +295,73 @@ void myDisplay(void)
 	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
 
+	// Update camera position and direction
+	player.updateCamera(currentMode);
+
+	// Set up the camera view
+	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+
 	// Draw Ground
 	RenderGround();
+
+	// Draw Player Model
 	glPushMatrix();
-	glScalef(0.5, 0.5, 0.5);
+	glTranslatef(player.position.x, player.position.y, player.position.z);
+	glScalef(2, 2, 2);
+	glTranslatef(0, 0, 2.5);
+	glRotatef(90, 1, 0, 0);
 	model_player.Draw();
 	glPopMatrix();
-	//// Draw Tree Model
-	//glPushMatrix();
-	//glTranslatef(10, 0, 0);
-	//glScalef(0.7, 0.7, 0.7);
-	//model_tree.Draw();
-	//glPopMatrix();
 
-	//// Draw house Model
-	//glPushMatrix();
-	//glRotatef(90.f, 1, 0, 0);
-	//model_house.Draw();
-	//glPopMatrix();
+	// Draw Crate Model
+	glPushMatrix();
+	glTranslatef(0, 0, -10);
+	glScalef(0.25, 0.25, 0.25);
+	model_crate1.Draw();
+	glPopMatrix();
+
+	// Draw Crate Model
+	glPushMatrix();
+	glTranslatef(0, 0, -5);
+	glRotatef(90, 1, 0, 0);
+	glScalef(0.05, 0.05, 0.05);
+	model_crate2.Draw();
+	glPopMatrix();
+
+	// Draw Crate Model
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	glRotatef(-90, 1, 0, 0);
+	glScalef(0.5, 0.5, 0.5);
+	glPushMatrix();
+	glRotatef(90, 0, 0, 1);
+	model_crate3.Draw();
+	glPopMatrix();
+	glPopMatrix();
+	
+	// Draw Car Model
+	glPushMatrix();
+	glTranslatef(0, 0, 5);
+	glScalef(0.1, 0.1, 0.1);
+	model_car.Draw();
+	glPopMatrix();
+
+	// Draw Enemy Model
+	glPushMatrix();
+	glTranslatef(0, 0, 10);
+	glScalef(0.5, 0.5, 0.5);
+	glRotatef(-90, 0, 1, 0);
+	model_enemy.Draw();
+	glPopMatrix();
+
+	// Draw Bench Model
+	glPushMatrix();
+	glTranslatef(0, 0, 15);
+	glScalef(0.01, 0.01, 0.01);
+	model_bench.Draw();
+	glPopMatrix();
+
+
 
 	//sky box
 	//glPushMatrix();
@@ -241,6 +388,26 @@ void myKeyboard(unsigned char button, int x, int y)
 {
 	switch (button)
 	{
+	case 'w':
+	case 'W':
+		player.moveForward();
+		break;
+	case 's':
+	case 'S':
+		player.moveBackward();
+		break;
+	case 'a':
+	case 'A':
+		player.moveLeft();
+		break;
+	case 'd':
+	case 'D':
+		player.moveRight();
+		break;
+	case 't':  // Toggle between first and third-person
+	case 'T':
+		currentMode = (currentMode == FIRST_PERSON) ? THIRD_PERSON : FIRST_PERSON;
+		break;
 	case 27: // ESC key
 		mouseEnabled = !mouseEnabled;
 		if (mouseEnabled) {
@@ -251,9 +418,10 @@ void myKeyboard(unsigned char button, int x, int y)
 			glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 		}
 		break;
-	default:
-		break;
 	}
+
+	// Update camera based on current mode
+	player.updateCamera(currentMode);
 	glutPostRedisplay();
 }
 
@@ -262,31 +430,19 @@ void myKeyboard(unsigned char button, int x, int y)
 //=======================================================================
 void myMotion(int x, int y)
 {
-	if (!mouseEnabled) return;
+	if (mouseEnabled) {
+		float dx = x - lastX;
+		float dy = y - lastY;
 
-	float xoffset = (x - WIDTH / 2) * sensitivity;
-	float yoffset = (HEIGHT / 2 - y) * sensitivity;
+		yaw += dx * sensitivity;  // Adjust horizontal rotation
+		pitch -= dy * sensitivity;  // Adjust vertical rotation (up and down)
 
-	// Reset mouse position to center
-	glutWarpPointer(WIDTH / 2, HEIGHT / 2);
+		if (pitch > 89.0f) pitch = 89.0f;
+		if (pitch < -89.0f) pitch = -89.0f;
 
-	// Update camera angles
-	yaw += xoffset;
-	pitch += yoffset;
-
-	// Constrain pitch
-	if (pitch > 89.0f) pitch = 89.0f;
-	if (pitch < -89.0f) pitch = -89.0f;
-
-	// Calculate new camera direction
-	At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
-	At.y = Eye.y + sin(radians(pitch));
-	At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
-
-	// Update the view
-	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
-	glutPostRedisplay();
+		lastX = x;
+		lastY = y;
+	}
 }
 
 //=======================================================================
@@ -329,9 +485,13 @@ void myReshape(int w, int h)
 void LoadAssets()
 {
 	//// Loading Model files
-	model_player.Load("Models/Scene1/Bench/bench.3ds");
-	//model_house.Load("Models/house/house.3DS");
-	//model_tree.Load("Models/tree/Tree1.3ds");
+	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
+	model_crate1.Load("Models/Scene2/crate1/crate.3ds");
+	model_crate2.Load("Models/Scene2/crate2/crate.3ds");
+	model_crate3.Load("Models/Scene2/crate3/crate.3ds");
+	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
+	model_bench.Load("Models/Scene2/Bench/bench.3ds");
+	model_player.Load("Models/Scene2/Player/player.3ds");
 
 	//// Loading texture files
 	tex_ground.Load("Textures/ground.bmp");
@@ -352,6 +512,8 @@ void main(int argc, char** argv)
 	glutInitWindowPosition(100, 150);
 
 	glutCreateWindow(title);
+
+	glutFullScreen();
 
 	glutDisplayFunc(myDisplay);
 
