@@ -192,31 +192,8 @@ void RenderGround()
 	glColor3f(1, 1, 1);	// Set material back to white instead of grey used for the ground texture.
 }
 
-//=======================================================================
-// Display Function
-//=======================================================================
-void myDisplay(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
-	//GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
-	//GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
-	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
-
-	// Draw Ground
-	//RenderGround();
-
-	// Draw Player Model
-	glPushMatrix();
-	glScalef(2, 2, 2);
-	glTranslatef(0, 0, 2.5);
-	glRotatef(90, 1, 0, 0);
-	model_player.Draw();
-	glPopMatrix();
-
+void renderMap2() {
 	//SIDE 1
 
 	// Draw Crate Model
@@ -273,14 +250,6 @@ void myDisplay(void)
 	model_car.Draw();
 	glPopMatrix();
 
-	// Draw Enemy Model
-	glPushMatrix();
-	glTranslatef(0, 0, 10);
-	glScalef(0.5, 0.5, 0.5);
-	glRotatef(-90, 0, 1, 0);
-	model_enemy.Draw();
-	glPopMatrix();
-
 	// Draw Bench Model
 	glPushMatrix();
 	glTranslatef(8, 0, 17);
@@ -296,6 +265,44 @@ void myDisplay(void)
 	model_map.Draw();
 	glPopMatrix();
 
+}
+//=======================================================================
+// Display Function
+//=======================================================================
+void myDisplay(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+	//GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
+	//GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
+	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+
+	// Draw Ground
+	//RenderGround();
+
+	// Draw Player Model
+	glPushMatrix();
+	glScalef(2, 2, 2);
+	glTranslatef(0, 0, 2.5);
+	glRotatef(90, 1, 0, 0);
+	model_player.Draw();
+	glPopMatrix();
+
+
+	// Draw Enemy Model
+	glPushMatrix();
+	glTranslatef(0, 0, 10);
+	glScalef(0.5, 0.5, 0.5);
+	glRotatef(-90, 0, 1, 0);
+	model_enemy.Draw();
+	glPopMatrix();
+
+
+	// Draw Map Model
+	renderMap2();
 
 	//sky box
 	glPushMatrix();
