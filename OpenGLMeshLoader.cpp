@@ -48,7 +48,17 @@ Model_3DS model_crate3;
 Model_3DS model_car;
 Model_3DS model_enemy;
 Model_3DS model_bench;
-Model_3DS model_map;
+Model_3DS model_map2;
+
+Model_3DS model_map1;
+Model_3DS model_bench1;
+Model_3DS model_boxes;
+Model_3DS model_weapon;
+Model_3DS model_munitions;
+Model_3DS model_planks;
+Model_3DS model_supplies;
+Model_3DS model_target;
+Model_3DS model_chair;
 
 
 
@@ -262,8 +272,67 @@ void renderMap2() {
 	glPushMatrix();
 	glTranslatef(5, 0, 5);
 	glScalef(3.0, 3.0, 3.0);
-	model_map.Draw();
+	model_map2.Draw();
 	glPopMatrix();
+
+}
+
+void renderMap1() {
+	// Draw Map Model
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	glScalef(3.0, 3.0, 3.0);
+	model_map1.Draw();
+	glPopMatrix();
+
+	// Draw Bench Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_bench1.Draw();
+	glPopMatrix();
+
+	// Draw Boxes Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_boxes.Draw();
+	glPopMatrix();
+
+	// Draw Weapon Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_weapon.Draw();
+	glPopMatrix();
+
+	// Draw Munitions Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_munitions.Draw();
+	glPopMatrix();
+
+	// Draw Planks Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_planks.Draw();
+	glPopMatrix();
+
+	// Draw Supplies Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_supplies.Draw();
+	glPopMatrix();
+
+	// Draw Target Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_target.Draw();
+	glPopMatrix();
+
+	// Draw Chair Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_chair.Draw();
+	glPopMatrix();
+		
 
 }
 //=======================================================================
@@ -283,26 +352,26 @@ void myDisplay(void)
 	// Draw Ground
 	//RenderGround();
 
-	// Draw Player Model
-	glPushMatrix();
-	glScalef(2, 2, 2);
-	glTranslatef(0, 0, 2.5);
-	glRotatef(90, 1, 0, 0);
-	model_player.Draw();
-	glPopMatrix();
+	//// Draw Player Model
+	//glPushMatrix();
+	//glScalef(2, 2, 2);
+	//glTranslatef(0, 0, 2.5);
+	//glRotatef(90, 1, 0, 0);
+	//model_player.Draw();
+	//glPopMatrix();
 
 
-	// Draw Enemy Model
-	glPushMatrix();
-	glTranslatef(0, 0, 10);
-	glScalef(0.5, 0.5, 0.5);
-	glRotatef(-90, 0, 1, 0);
-	model_enemy.Draw();
-	glPopMatrix();
+	//// Draw Enemy Model
+	//glPushMatrix();
+	//glTranslatef(0, 0, 10);
+	//glScalef(0.5, 0.5, 0.5);
+	//glRotatef(-90, 0, 1, 0);
+	//model_enemy.Draw();
+	//glPopMatrix();
 
 
 	// Draw Map Model
-	renderMap2();
+	renderMap1();
 
 	//sky box
 	glPushMatrix();
@@ -419,15 +488,30 @@ void myReshape(int w, int h)
 //=======================================================================
 void LoadAssets()
 {
-	//// Loading Model files
+
+	model_player.Load("Models/Scene2/Player/player2.3ds");
+
+	//// Loading Map2 files
 	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
 	model_crate1.Load("Models/Scene2/crate1/crate.3ds");
 	model_crate2.Load("Models/Scene2/crate2/crate.3ds");
 	model_crate3.Load("Models/Scene2/crate3/crate.3ds");
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
-	model_player.Load("Models/Scene2/Player/player2.3ds");
-	model_map.Load("Models/Scene1/Map/map.3ds");
+	model_map2.Load("Models/Scene2/Map/map3.3ds");
+
+	//// Loading Map1 files
+	model_map1.Load("Models/Scene1/Map/map.3ds");
+	model_bench1.Load("Models/Scene1/Bench/bench.3ds");
+	model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
+	model_weapon.Load("Models/Scene1/Weapon/weapon.3ds");
+	model_munitions.Load("Models/Scene1/Munitions/munitions.3ds");
+	model_planks.Load("Models/Scene1/Planks/plank.3ds");
+	model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
+	model_target.Load("Models/Scene1/Target/target.3ds");
+	model_chair.Load("Models/Scene1/Chair/chair.3ds");
+
+
 
 
 	//// Loading texture files
