@@ -82,6 +82,7 @@
 
 #include <math.h>			// Header file for the math library
 #include <gl\gl.h>			// Header file for the OpenGL32 library
+#include <limits.h>
 
 // The chunk's id numbers
 #define MAIN3DS				0x4D4D
@@ -155,6 +156,9 @@ Model_3DS::Model_3DS()
 	rot.y = 0.0f;
 	rot.z = 0.0f;
 
+	float minX, minY, minZ;
+	float maxX, maxY, maxZ;
+
 	// Set up the path
 	path = new char[80];
 	sprintf_s(path, sizeof(path), "");
@@ -170,6 +174,32 @@ Model_3DS::Model_3DS()
 Model_3DS::~Model_3DS()
 {
 
+}
+
+void Model_3DS::CalculateBoundingBox() {
+	// Initialize bounding box values
+	minX = minY = minZ = 1e30f;
+	maxX = maxY = maxZ = -1e30f;
+
+	// Loop through all objects
+	for (int i = 0; i < numObjects; ++i) {
+		Object& obj = Objects[i];
+
+		// Loop through vertices of the object
+		for (int j = 0; j < obj.numVerts; ++j) {
+			float x = obj.Vertexes[j * 3];
+			float y = obj.Vertexes[j * 3 + 1];
+			float z = obj.Vertexes[j * 3 + 2];
+
+			// Update the min/max bounds
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
+		}
+	}
 }
 
 void Model_3DS::Load(char *name)
@@ -272,7 +302,13 @@ void Model_3DS::Load(char *name)
 			Materials[j].textured = true;
 		}
 	}
+	CalculateBoundingBox();
+	printf("Bounding Box: Min(%.2f, %.2f, %.2f), Max(%.2f, %.2f, %.2f)\n",
+		minX, minY, minZ, maxX, maxY, maxZ);
+
 }
+
+
 
 void Model_3DS::Draw()
 {

@@ -60,8 +60,6 @@ Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
 
-
-
 // Textures
 GLTexture tex_ground;
 
@@ -201,7 +199,6 @@ void RenderGround()
 
 	glColor3f(1, 1, 1);	// Set material back to white instead of grey used for the ground texture.
 }
-
 
 void renderMap2() {
 	//SIDE 1
@@ -534,9 +531,6 @@ void LoadAssets()
 	model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
 	model_target.Load("Models/Scene1/Target/target.3ds");
 	model_chair.Load("Models/Scene1/Chair/chair.3ds");
-
-
-
 
 	//// Loading texture files
 	tex_ground.Load("Textures/ground.bmp");
