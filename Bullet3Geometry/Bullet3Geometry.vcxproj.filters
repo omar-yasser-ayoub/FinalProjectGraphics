@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3ConvexHullComputer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3GeometryUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3AabbUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3ConvexHullComputer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3GeometryUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\b3GrahamScan2dConvexHull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\reeka\OneDrive\Desktop\bullet\bullet3\src\Bullet3Geometry\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{33E1B760-04AA-39CC-A471-141BC7C8D03C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0F78233F-952C-3D15-B7C2-7EB75D930F46}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
