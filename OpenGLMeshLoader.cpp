@@ -427,7 +427,7 @@ void LoadAssets()
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
 	model_player.Load("Models/Scene2/Player/player2.3ds");
-	model_map.Load("Models/Scene2/Map/map3.3ds");
+	model_map.Load("Models/Scene1/Map/map.3ds");
 
 
 	//// Loading texture files
