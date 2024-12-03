@@ -287,21 +287,24 @@ void renderMap1() {
 
 	// Draw Bench Model
 	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
+	glTranslatef(0, 3, 15);
+	glRotatef(90, 0, 1, 0);
+	glScalef(0.075, 0.075, 0.075);
 	model_bench1.Draw();
 	glPopMatrix();
 
 	// Draw Boxes Model
 	glPushMatrix();
+	glTranslatef(5, 2, 5);
 	glScalef(0.1, 0.1, 0.1);
 	model_boxes.Draw();
 	glPopMatrix();
 
-	// Draw Weapon Model
-	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
-	model_weapon.Draw();
-	glPopMatrix();
+	//// Draw Weapon Model
+	//glPushMatrix();
+	//glScalef(0.1, 0.1, 0.1);
+	//model_weapon.Draw();
+	//glPopMatrix();
 
 	// Draw Munitions Model
 	glPushMatrix();
@@ -311,25 +314,46 @@ void renderMap1() {
 
 	// Draw Planks Model
 	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
+	glTranslatef(0, 0, -5);
+	glRotatef(-90, 1, 0, 0);
+	glScalef(0.5, 0.5, 0.5);
 	model_planks.Draw();
 	glPopMatrix();
 
 	// Draw Supplies Model
 	glPushMatrix();
+	glTranslatef(-5, 0, 5);
+	glRotatef(90, 0, 1, 0);
 	glScalef(0.1, 0.1, 0.1);
 	model_supplies.Draw();
 	glPopMatrix();
 
 	// Draw Target Model
 	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
+	glTranslatef(0, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
+	model_target.Draw();
+	glPopMatrix();
+
+	// Draw Target Model
+	glPushMatrix();
+	glTranslatef(-5, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
+	model_target.Draw();
+	glPopMatrix();
+
+	// Draw Target Model
+	glPushMatrix();
+	glTranslatef(5, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
 	model_target.Draw();
 	glPopMatrix();
 
 	// Draw Chair Model
 	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
+	glTranslatef(5, 2, 15);
+	glRotatef(45, 0, 1, 0);
+	glScalef(0.025, 0.025, 0.025);
 	model_chair.Draw();
 	glPopMatrix();
 		
