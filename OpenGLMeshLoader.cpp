@@ -4,6 +4,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <glut.h>
 #include <math.h>
+#include <lib3ds/file.h>
+#include <lib3ds/mesh.h>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;

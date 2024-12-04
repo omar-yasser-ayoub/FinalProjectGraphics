@@ -59,7 +59,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glut32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies);BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib</AdditionalDependencies>
+      <AdditionalDependencies>glut32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies);BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;lib3ds.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
