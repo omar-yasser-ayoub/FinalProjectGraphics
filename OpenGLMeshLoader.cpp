@@ -24,6 +24,7 @@ btDefaultCollisionConfiguration* collisionConfiguration;
 btCollisionDispatcher* dispatcher;
 btBroadphaseInterface* overlappingPairCache;
 btSequentialImpulseConstraintSolver* solver;
+btRigidBody* playerRigidBody = nullptr;
 
 class Vector
 {
@@ -89,6 +90,41 @@ float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
 
+// Add player physics
+void playerPhysics() {
+	// Create player collision shape
+	btCollisionShape* playerShape = new btCapsuleShape(0.5, 1.5); // radius, height
+
+	// Create player motion state (initial position)
+	btDefaultMotionState* playerMotionState =
+		new btDefaultMotionState(btTransform(
+			btQuaternion(0, 0, 0, 1),
+			btVector3(0, 5, 0) // slightly above the ground
+		));
+
+	// Define player mass and inertia
+	btScalar mass = 70.0f;
+	btVector3 playerInertia(0, 0, 0);
+	playerShape->calculateLocalInertia(mass, playerInertia);
+
+	// Create player rigid body construction info
+	btRigidBody::btRigidBodyConstructionInfo
+		playerRigidBodyCI(mass, playerMotionState, playerShape, playerInertia);
+
+	// Adjust some properties to make player movement more realistic
+	playerRigidBodyCI.m_restitution = 0.1f; // Slight bounciness
+	playerRigidBodyCI.m_friction = 2.0f; // Ground friction
+
+	// Create player rigid body
+	playerRigidBody = new btRigidBody(playerRigidBodyCI);
+
+	// Disable rotation to keep player upright
+	playerRigidBody->setAngularFactor(btVector3(0, 0, 0));
+
+	// Add player to the dynamics world
+	dynamicsWorld->addRigidBody(playerRigidBody);
+}
+
 // Initialize Bullet Physics world
 void initPhysicsWorld() {
 	// Create the collision configuration
@@ -112,7 +148,7 @@ void initPhysicsWorld() {
 	);
 
 	// Set gravity (default is -9.8 m/s^2 on Y-axis)
-	dynamicsWorld->setGravity(btVector3(0, -9.8f, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9.8f * 2, 0));
 
 	// Create ground plane
 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
@@ -131,10 +167,20 @@ void initPhysicsWorld() {
 
 	// Add ground to the dynamics world
 	dynamicsWorld->addRigidBody(groundRigidBody);
+
+	playerPhysics();
 }
 
 // Clean up Bullet Physics resources
 void cleanupPhysicsWorld() {
+	// Remove and delete player rigid body
+	if (playerRigidBody) {
+		dynamicsWorld->removeRigidBody(playerRigidBody);
+		delete playerRigidBody->getMotionState();
+		delete playerRigidBody;
+		playerRigidBody = nullptr;
+	}
+
 	// Remove ground body from dynamics world
 	dynamicsWorld->removeRigidBody(groundRigidBody);
 
@@ -360,39 +406,39 @@ void renderMap1() {
 	glPopMatrix();
 
 	// Draw Bench Model
-	//glPushMatrix();
-	//glTranslatef(0, 3, 15);
-	//glRotatef(90, 0, 1, 0);
-	//glScalef(0.075, 0.075, 0.075);
-	//model_bench1.Draw();
-	//glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0, 3, 15);
+	glRotatef(90, 0, 1, 0);
+	glScalef(0.075, 0.075, 0.075);
+	model_bench1.Draw();
+	glPopMatrix();
 
-	//// Draw Boxes Model
-	//glPushMatrix();
-	//glTranslatef(5, 2, 5);
-	//glScalef(0.1, 0.1, 0.1);
-	//model_boxes.Draw();
-	//glPopMatrix();
+	// Draw Boxes Model
+	glPushMatrix();
+	glTranslatef(5, 2, 5);
+	glScalef(0.1, 0.1, 0.1);
+	model_boxes.Draw();
+	glPopMatrix();
 
-	//// Draw Weapon Model
-	//glPushMatrix();
-	//glScalef(0.1, 0.1, 0.1);
-	//model_weapon.Draw();
-	//glPopMatrix();
+	// Draw Weapon Model
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_weapon.Draw();
+	glPopMatrix();
 
 	// Draw Munitions Model
-	//glPushMatrix();
-	//glScalef(0.1, 0.1, 0.1);
-	//model_munitions.Draw();
-	//glPopMatrix();
+	glPushMatrix();
+	glScalef(0.1, 0.1, 0.1);
+	model_munitions.Draw();
+	glPopMatrix();
 
-	//// Draw Planks Model
-	//glPushMatrix();
-	//glTranslatef(0, 0, -5);
-	//glRotatef(-90, 1, 0, 0);
-	//glScalef(0.5, 0.5, 0.5);
-	//model_planks.Draw();
-	//glPopMatrix();
+	// Draw Planks Model
+	glPushMatrix();
+	glTranslatef(0, 0, -5);
+	glRotatef(-90, 1, 0, 0);
+	glScalef(0.5, 0.5, 0.5);
+	model_planks.Draw();
+	glPopMatrix();
 
 	// Draw Supplies Model
 	glPushMatrix();
@@ -403,25 +449,25 @@ void renderMap1() {
 	glPopMatrix();
 
 	// Draw Target Model
-	//glPushMatrix();
-	//glTranslatef(0, 0, -10);
-	//glScalef(0.025, 0.025, 0.025);
-	//model_target.Draw();
-	//glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
+	model_target.Draw();
+	glPopMatrix();
 
 	//// Draw Target Model
-	//glPushMatrix();
-	//glTranslatef(-5, 0, -10);
-	//glScalef(0.025, 0.025, 0.025);
-	//model_target.Draw();
-	//glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-5, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
+	model_target.Draw();
+	glPopMatrix();
 
 	//// Draw Target Model
-	//glPushMatrix();
-	//glTranslatef(5, 0, -10);
-	//glScalef(0.025, 0.025, 0.025);
-	//model_target.Draw();
-	//glPopMatrix();
+	glPushMatrix();
+	glTranslatef(5, 0, -10);
+	glScalef(0.025, 0.025, 0.025);
+	model_target.Draw();
+	glPopMatrix();
 
 	// Draw Chair Model
 	glPushMatrix();
@@ -432,6 +478,24 @@ void renderMap1() {
 	glPopMatrix();
 
 
+}
+
+void drawPlayer() {
+	// Update player position from physics simulation
+	if (playerRigidBody) {
+		btTransform trans;
+		playerRigidBody->getMotionState()->getWorldTransform(trans);
+
+		// Update Eye position based on player rigid body
+		Eye.x = trans.getOrigin().x();
+		Eye.y = trans.getOrigin().y() + 3; // Adjust height as needed
+		Eye.z = trans.getOrigin().z();
+
+		// Update At position to maintain camera direction
+		At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+		At.y = Eye.y + sin(radians(pitch));
+		At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+	}
 }
 //=======================================================================
 // Display Function
@@ -453,11 +517,11 @@ void myDisplay(void)
 	//// Draw Player Model
 	//glPushMatrix();
 	//glScalef(2, 2, 2);
-	//glTranslatef(0, 0, 2.5);
+	//glTranslatef(0, 3, 2.5);
 	//glRotatef(90, 1, 0, 0);
 	//model_player.Draw();
 	//glPopMatrix();
-
+	drawPlayer();
 
 	//// Draw Enemy Model
 	//glPushMatrix();
@@ -497,8 +561,31 @@ void myDisplay(void)
 //=======================================================================
 void myKeyboard(unsigned char button, int x, int y)
 {
+	if (!playerRigidBody) return;
+
+	float moveSpeed = 60.0f;
+	btVector3 moveDirection(0, 0, 0);
+
 	switch (button)
 	{
+	case 'w': // Move forward
+		moveDirection.setX(moveSpeed);
+		break;
+	case 's': // Move backward
+		moveDirection.setX(-moveSpeed);
+		break;
+	case 'a': // Move left
+		moveDirection.setZ(moveSpeed);
+		break;
+	case 'd': // Move right
+		moveDirection.setZ(-moveSpeed);
+		break;
+	case ' ': // Jump
+		// Only allow jumping if player is somewhat grounded
+		if (abs(playerRigidBody->getLinearVelocity().y()) < 0.1f) {
+			playerRigidBody->applyCentralImpulse(btVector3(0, 600, 0)); // Jump impulse
+		}
+		break;
 	case 27: // ESC key
 		mouseEnabled = !mouseEnabled;
 		if (mouseEnabled) {
@@ -510,11 +597,22 @@ void myKeyboard(unsigned char button, int x, int y)
 		}
 		break;
 	case 'f':
-		glutReshapeWindow(800, 600); // Set the window size
-		glutPositionWindow(100, 100); // Position the window
-	default:
+		glutReshapeWindow(800, 600);
+		glutPositionWindow(100, 100);
 		break;
 	}
+
+	// Convert move direction to world space considering camera orientation
+	btVector3 forward(sin(radians(yaw)), 0, -cos(radians(yaw)));
+	btVector3 right(forward.cross(btVector3(0, 1, 0)));
+
+	btVector3 worldMoveDirection =
+		forward * moveDirection.z() +
+		right * moveDirection.x();
+
+	// Apply movement
+	playerRigidBody->activate(true); // Wake up the rigid body
+	playerRigidBody->applyCentralImpulse(worldMoveDirection);
 	glutPostRedisplay();
 }
 
