@@ -1,9 +1,9 @@
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
 #include "GLTexture.h"
+#include <btBulletDynamicsCommon.h>
 #include <glut.h>
 #include <math.h>
-#include <btBulletCollisionCommon.h>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
@@ -11,19 +11,25 @@ int HEIGHT = 1080;
 GLuint tex;
 char title[] = "3D Model Loader Sample";
 
-btAlignedObjectArray<int> testArray;
-
 // 3D Projection Options
 GLdouble fovy = 90.0;
 GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 250;
 
+// Bullet Physics variables
+btDiscreteDynamicsWorld* dynamicsWorld;
+btRigidBody* groundRigidBody;
+btDefaultCollisionConfiguration* collisionConfiguration;
+btCollisionDispatcher* dispatcher;
+btBroadphaseInterface* overlappingPairCache;
+btSequentialImpulseConstraintSolver* solver;
+
 class Vector
 {
 public:
 	GLdouble x, y, z;
-	Vector() {}
+	Vector() : x(0), y(0), z(0) {} // Initialize x, y, and z to 0
 	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
 	//================================================================================================//
 	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
@@ -81,6 +87,72 @@ mode currentMode = FIRST_PERSON;
 
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
+}
+
+// Initialize Bullet Physics world
+void initPhysicsWorld() {
+	// Create the collision configuration
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+
+	// Create the dispatcher
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+	// Create the broadphase interface
+	overlappingPairCache = new btDbvtBroadphase();
+
+	// Create the constraint solver
+	solver = new btSequentialImpulseConstraintSolver;
+
+	// Create the dynamics world
+	dynamicsWorld = new btDiscreteDynamicsWorld(
+		dispatcher,
+		overlappingPairCache,
+		solver,
+		collisionConfiguration
+	);
+
+	// Set gravity (default is -9.8 m/s^2 on Y-axis)
+	dynamicsWorld->setGravity(btVector3(0, -9.8f, 0));
+
+	// Create ground plane
+	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+
+	// Create ground motion state (initial position)
+	btDefaultMotionState* groundMotionState =
+		new btDefaultMotionState(btTransform(
+			btQuaternion(0, 0, 0, 1),
+			btVector3(0, 0, 0)
+		));
+
+	// Create ground rigid body
+	btRigidBody::btRigidBodyConstructionInfo
+		groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	groundRigidBody = new btRigidBody(groundRigidBodyCI);
+
+	// Add ground to the dynamics world
+	dynamicsWorld->addRigidBody(groundRigidBody);
+}
+
+// Clean up Bullet Physics resources
+void cleanupPhysicsWorld() {
+	// Remove ground body from dynamics world
+	dynamicsWorld->removeRigidBody(groundRigidBody);
+
+	// Delete physics objects
+	delete groundRigidBody->getMotionState();
+	delete groundRigidBody;
+
+	// Delete world and solver components
+	delete dynamicsWorld;
+	delete solver;
+	delete overlappingPairCache;
+	delete dispatcher;
+	delete collisionConfiguration;
+}
+
+// Update physics simulation
+void updatePhysics(float deltaTime) {
+	dynamicsWorld->stepSimulation(deltaTime, 10);
 }
 
 //=======================================================================
@@ -169,6 +241,8 @@ void myInit(void)
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_NORMALIZE);
+
+	initPhysicsWorld(); // Initialize Bullet Physics
 }
 
 //=======================================================================
@@ -286,19 +360,19 @@ void renderMap1() {
 	glPopMatrix();
 
 	// Draw Bench Model
-	glPushMatrix();
-	glTranslatef(0, 3, 15);
-	glRotatef(90, 0, 1, 0);
-	glScalef(0.075, 0.075, 0.075);
-	model_bench1.Draw();
-	glPopMatrix();
+	//glPushMatrix();
+	//glTranslatef(0, 3, 15);
+	//glRotatef(90, 0, 1, 0);
+	//glScalef(0.075, 0.075, 0.075);
+	//model_bench1.Draw();
+	//glPopMatrix();
 
-	// Draw Boxes Model
-	glPushMatrix();
-	glTranslatef(5, 2, 5);
-	glScalef(0.1, 0.1, 0.1);
-	model_boxes.Draw();
-	glPopMatrix();
+	//// Draw Boxes Model
+	//glPushMatrix();
+	//glTranslatef(5, 2, 5);
+	//glScalef(0.1, 0.1, 0.1);
+	//model_boxes.Draw();
+	//glPopMatrix();
 
 	//// Draw Weapon Model
 	//glPushMatrix();
@@ -307,18 +381,18 @@ void renderMap1() {
 	//glPopMatrix();
 
 	// Draw Munitions Model
-	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
-	model_munitions.Draw();
-	glPopMatrix();
+	//glPushMatrix();
+	//glScalef(0.1, 0.1, 0.1);
+	//model_munitions.Draw();
+	//glPopMatrix();
 
-	// Draw Planks Model
-	glPushMatrix();
-	glTranslatef(0, 0, -5);
-	glRotatef(-90, 1, 0, 0);
-	glScalef(0.5, 0.5, 0.5);
-	model_planks.Draw();
-	glPopMatrix();
+	//// Draw Planks Model
+	//glPushMatrix();
+	//glTranslatef(0, 0, -5);
+	//glRotatef(-90, 1, 0, 0);
+	//glScalef(0.5, 0.5, 0.5);
+	//model_planks.Draw();
+	//glPopMatrix();
 
 	// Draw Supplies Model
 	glPushMatrix();
@@ -329,25 +403,25 @@ void renderMap1() {
 	glPopMatrix();
 
 	// Draw Target Model
-	glPushMatrix();
-	glTranslatef(0, 0, -10);
-	glScalef(0.025, 0.025, 0.025);
-	model_target.Draw();
-	glPopMatrix();
+	//glPushMatrix();
+	//glTranslatef(0, 0, -10);
+	//glScalef(0.025, 0.025, 0.025);
+	//model_target.Draw();
+	//glPopMatrix();
 
-	// Draw Target Model
-	glPushMatrix();
-	glTranslatef(-5, 0, -10);
-	glScalef(0.025, 0.025, 0.025);
-	model_target.Draw();
-	glPopMatrix();
+	//// Draw Target Model
+	//glPushMatrix();
+	//glTranslatef(-5, 0, -10);
+	//glScalef(0.025, 0.025, 0.025);
+	//model_target.Draw();
+	//glPopMatrix();
 
-	// Draw Target Model
-	glPushMatrix();
-	glTranslatef(5, 0, -10);
-	glScalef(0.025, 0.025, 0.025);
-	model_target.Draw();
-	glPopMatrix();
+	//// Draw Target Model
+	//glPushMatrix();
+	//glTranslatef(5, 0, -10);
+	//glScalef(0.025, 0.025, 0.025);
+	//model_target.Draw();
+	//glPopMatrix();
 
 	// Draw Chair Model
 	glPushMatrix();
@@ -356,7 +430,7 @@ void renderMap1() {
 	glScalef(0.025, 0.025, 0.025);
 	model_chair.Draw();
 	glPopMatrix();
-		
+
 
 }
 //=======================================================================
@@ -411,6 +485,9 @@ void myDisplay(void)
 	gluDeleteQuadric(qobj);
 
 	glPopMatrix();
+
+	// Optional: Add physics debug drawing
+	dynamicsWorld->debugDrawWorld();
 
 	glutSwapBuffers();
 }
@@ -540,6 +617,17 @@ void LoadAssets()
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
 
+void onUpdate(int value) {
+	// Update physics simulation
+	updatePhysics(1.0f / 60.0f);  // Assuming 60 FPS
+
+	// Request a redraw
+	glutPostRedisplay();
+
+	// Set up the next timer event
+	glutTimerFunc(16, onUpdate, 0);  // ~60 FPS
+}
+
 //=======================================================================
 // Main Function
 //=======================================================================
@@ -554,6 +642,8 @@ void main(int argc, char** argv)
 	glutInitWindowPosition(100, 150);
 
 	glutCreateWindow(title);
+
+	glutTimerFunc(0, onUpdate, 0);
 
 	glutFullScreen();
 
@@ -578,4 +668,6 @@ void main(int argc, char** argv)
 	glShadeModel(GL_SMOOTH);
 
 	glutMainLoop();
+
+	cleanupPhysicsWorld(); // Cleanup physics world when done
 }
