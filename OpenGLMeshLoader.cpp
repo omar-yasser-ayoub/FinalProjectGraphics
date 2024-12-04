@@ -3,12 +3,15 @@
 #include "GLTexture.h"
 #include <glut.h>
 #include <math.h>
+#include <btBulletCollisionCommon.h>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
 
 GLuint tex;
 char title[] = "3D Model Loader Sample";
+
+btAlignedObjectArray<int> testArray;
 
 // 3D Projection Options
 GLdouble fovy = 90.0;
