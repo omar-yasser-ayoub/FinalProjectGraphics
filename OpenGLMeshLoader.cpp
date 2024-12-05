@@ -8,6 +8,7 @@
 #include <lib3ds/mesh.h>
 #include <unordered_map>
 #include <vector>
+#include <stdio.h>
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
@@ -32,6 +33,9 @@ btCollisionDispatcher* dispatcher;
 btBroadphaseInterface* overlappingPairCache;
 btSequentialImpulseConstraintSolver* solver;
 btRigidBody* playerRigidBody = nullptr;
+btTriangleMesh* mapTriangleMeshShape = nullptr;
+btBvhTriangleMeshShape* mapCollisionShape = nullptr;
+btScaledBvhTriangleMeshShape* scaledMeshShape = nullptr;
 
 class Vector
 {
@@ -76,6 +80,7 @@ Model_3DS model_planks;
 Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
+
 
 // Textures
 GLTexture tex_ground;
@@ -186,22 +191,39 @@ void initPhysicsWorld() {
 	dynamicsWorld->setGravity(btVector3(0, -9.8f * 6, 0));
 
 	// Create ground plane
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+	mapTriangleMeshShape = model_map2.CreateBulletTriangleMesh();
+	if (!mapTriangleMeshShape) {
+		printf("Failed to create map triangle mesh shape\n");
+		return;
+	}
 
-	// Create ground motion state (initial position)
-	btDefaultMotionState* groundMotionState =
-		new btDefaultMotionState(btTransform(
+	mapCollisionShape = new btBvhTriangleMeshShape(mapTriangleMeshShape, true);
+	if (!mapCollisionShape) {
+		printf("Failed to create map collision shape\n");
+		return;
+	}
+
+	// Create collision shape with scaling
+	btVector3 meshScale(3.0f, 3.0f, 3.0f);
+	scaledMeshShape = new btScaledBvhTriangleMeshShape(mapCollisionShape, meshScale);
+
+	// Set up the rigid body with translation
+	btDefaultMotionState* motionState = new btDefaultMotionState(
+		btTransform(
 			btQuaternion(0, 0, 0, 1),
-			btVector3(0, -1, 0)
-		));
+			btVector3(5, -1, 5)  // Translation vector
+		)
+	);
 
-	// Create ground rigid body
-	btRigidBody::btRigidBodyConstructionInfo
-		groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-	groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(
+		0,                        // Mass = 0 for static objects
+		motionState,
+		scaledMeshShape,
+		btVector3(0, 0, 0)        // No local inertia for static objects
+	);
 
-	// Add ground to the dynamics world
-	dynamicsWorld->addRigidBody(groundRigidBody);
+	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
+	dynamicsWorld->addRigidBody(rigidBody);
 
 	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5));   // model_crate1
 	addStaticBody(model_crate2, btVector3(5, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2

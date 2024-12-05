@@ -83,6 +83,7 @@
 #include <math.h>			// Header file for the math library
 #include <gl\gl.h>			// Header file for the OpenGL32 library
 #include <limits.h>
+#include <btBulletDynamicsCommon.h>
 
 // The chunk's id numbers
 #define MAIN3DS				0x4D4D
@@ -202,6 +203,67 @@ void Model_3DS::CalculateBoundingBox() {
 	}
 }
 
+btTriangleMesh* Model_3DS::CreateBulletTriangleMesh() {
+	// Validate basic model data
+	if (numObjects <= 0 || !Objects) {
+		return nullptr;
+	}
+
+	// Create the triangle mesh
+	btTriangleMesh* mesh = new btTriangleMesh();
+
+	// Process each object in the model
+	for (int i = 0; i < numObjects; ++i) {
+		Object& obj = Objects[i];
+
+		// Validate object-specific data
+		if (!obj.Vertexes || !obj.Faces || obj.numFaces <= 0 || obj.numVerts <= 0) {
+			continue;
+		}
+
+		// Process each face of the object
+		for (int j = 0; j < obj.numFaces; ++j) {
+			// Calculate face indices
+			int index0 = obj.Faces[j * 3];
+			int index1 = obj.Faces[j * 3 + 1];
+			int index2 = obj.Faces[j * 3 + 2];
+
+			// Validate vertex indices
+			if (index0 < 0 || index1 < 0 || index2 < 0 ||
+				index0 >= obj.numVerts || index1 >= obj.numVerts || index2 >= obj.numVerts) {
+				continue;
+			}
+
+			// Create Bullet vectors for each vertex
+			btVector3 vertex0(
+				obj.Vertexes[index0 * 3],     // X-coordinate
+				obj.Vertexes[index0 * 3 + 1], // Y-coordinate
+				obj.Vertexes[index0 * 3 + 2]  // Z-coordinate
+			);
+
+			btVector3 vertex1(
+				obj.Vertexes[index1 * 3],
+				obj.Vertexes[index1 * 3 + 1],
+				obj.Vertexes[index1 * 3 + 2]
+			);
+
+			btVector3 vertex2(
+				obj.Vertexes[index2 * 3],
+				obj.Vertexes[index2 * 3 + 1],
+				obj.Vertexes[index2 * 3 + 2]
+			);
+
+			// Add the triangle to the mesh
+			mesh->addTriangle(vertex0, vertex1, vertex2);
+		}
+	}
+
+	// Return the created mesh (might be empty if no valid triangles)
+	return mesh;
+}
+
+
+
 void Model_3DS::Load(char *name)
 {
 	// holds the main chunk header
@@ -303,9 +365,6 @@ void Model_3DS::Load(char *name)
 		}
 	}
 	CalculateBoundingBox();
-	printf("Bounding Box: Min(%.2f, %.2f, %.2f), Max(%.2f, %.2f, %.2f)\n",
-		minX, minY, minZ, maxX, maxY, maxZ);
-
 }
 
 
