@@ -223,6 +223,11 @@ btTriangleMesh* Model_3DS::CreateBulletTriangleMesh() {
 
 		// Process each face of the object
 		for (int j = 0; j < obj.numFaces; ++j) {
+			// Check that Faces is not null and there are enough indices for the face
+			if (obj.Faces == nullptr || j * 3 + 2 >= obj.numFaces) {
+				continue; // Skip this face if there's an issue with the Faces array
+			}
+
 			// Calculate face indices
 			int index0 = obj.Faces[j * 3];
 			int index1 = obj.Faces[j * 3 + 1];
@@ -231,7 +236,7 @@ btTriangleMesh* Model_3DS::CreateBulletTriangleMesh() {
 			// Validate vertex indices
 			if (index0 < 0 || index1 < 0 || index2 < 0 ||
 				index0 >= obj.numVerts || index1 >= obj.numVerts || index2 >= obj.numVerts) {
-				continue;
+				continue; // Skip if any of the vertex indices are invalid
 			}
 
 			// Create Bullet vectors for each vertex
