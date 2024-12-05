@@ -12,20 +12,14 @@
 
 int WIDTH = 1920;
 int HEIGHT = 1080;
-
 GLuint tex;
 char title[] = "FPS Game";
-
-// 3D Projection Options
 GLdouble fovy = 90.0;
 GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 250;
-
 std::unordered_map<unsigned char, bool> keyState;
 std::vector<Model_3DS> models;
-
-// Bullet Physics variables
 btDiscreteDynamicsWorld* dynamicsWorld;
 btRigidBody* groundRigidBody;
 btDefaultCollisionConfiguration* collisionConfiguration;
@@ -36,17 +30,12 @@ btRigidBody* playerRigidBody = nullptr;
 btTriangleMesh* mapTriangleMeshShape = nullptr;
 btBvhTriangleMeshShape* mapCollisionShape = nullptr;
 btScaledBvhTriangleMeshShape* scaledMeshShape = nullptr;
-
 class Vector
 {
 public:
 	GLdouble x, y, z;
 	Vector() : x(0), y(0), z(0) {} // Initialize x, y, and z to 0
 	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-	//================================================================================================//
-	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
-	// Here we are overloading the += operator to add a given value to all vector coordinates.        //
-	//================================================================================================//
 	void operator +=(float value)
 	{
 		x += value;
@@ -54,14 +43,11 @@ public:
 		z += value;
 	}
 };
-
 Vector Eye(0, 15, 0);
 Vector At(0, 5, 0);
 Vector Up(0, 1, 0);
-
 int cameraZoom = 0;
 
-// Model Variables
 Model_3DS model_player;
 Model_3DS model_crate1;
 Model_3DS model_crate2;
@@ -70,7 +56,6 @@ Model_3DS model_car;
 Model_3DS model_enemy;
 Model_3DS model_bench;
 Model_3DS model_map2;
-
 Model_3DS model_map1;
 Model_3DS model_bench1;
 Model_3DS model_boxes;
@@ -80,9 +65,6 @@ Model_3DS model_planks;
 Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
-
-
-// Textures
 GLTexture tex_ground;
 
 enum mode {
@@ -103,14 +85,12 @@ enum displayMode {
 	MAP_1,
 	MAP_2,
 };
-
 displayMode currentDisplayMode = MAIN_MENU;
 
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
 
-// Add player physics
 void playerPhysics() {
 	// Create player collision shape
 	btCollisionShape* playerShape = new btCapsuleShape(0.5, 1.5); // radius, height
@@ -202,8 +182,6 @@ void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, cons
 	dynamicsWorld->addRigidBody(rigidBody);
 }
 
-
-// Initialize Bullet Physics world
 void initPhysicsWorld() {
 	// Create the collision configuration
 	collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -284,7 +262,6 @@ void initPhysicsWorld() {
 	playerPhysics();
 }
 
-// Clean up Bullet Physics resources
 void cleanupPhysicsWorld() {
 	// Remove and delete player rigid body
 	if (playerRigidBody) {
@@ -309,17 +286,12 @@ void cleanupPhysicsWorld() {
 	delete collisionConfiguration;
 }
 
-// Update physics simulation
 void updatePhysics(float deltaTime) {
 	dynamicsWorld->stepSimulation(deltaTime, 10);
 }
 
-//=======================================================================
-// Assets Loading Function
-//=======================================================================
 void LoadAssets()
 {
-
 	model_player.Load("Models/Scene2/Player/player2.3ds");
 
 	//// Loading Map2 files
@@ -363,59 +335,37 @@ void LoadAssets()
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
 
-//=======================================================================
-// Lighting Configuration Function
-//=======================================================================
-void InitLightSource()
-{
-	// Enable Lighting for this OpenGL Program
+void initMaterials() {
+	// Set consistent material properties
+	float MatAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };     // Some ambient reflection
+	float MatDiffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };     // Consistent diffuse reflection
+	float MatSpecular[] = { 0.5f, 0.5f, 0.5f, 1.0f };    // Some specular highlights
+	float MatShininess = 50.0f;                          // Moderate shininess
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, MatAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MatDiffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, MatSpecular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, MatShininess);
+
 	glEnable(GL_LIGHTING);
-
-	// Enable Light Source number 0
-	// OpengL has 8 light sources
 	glEnable(GL_LIGHT0);
-
-	// Define Light source 0 ambient light
-	GLfloat ambient[] = { 0.2f, 0.2f, 0.2, 1.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-
-	// Define Light source 0 diffuse light
-	GLfloat diffuse[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-
-	// Define Light source 0 Specular light
-	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-
-	// Finally, define light source 0 position in World Space
-	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
-//=======================================================================
-// Material Configuration Function
-//======================================================================
-void InitMaterial()
-{
-	// Enable Material Tracking
-	glEnable(GL_COLOR_MATERIAL);
+void setupLights() {
+	// Position light relative to camera/view
+	GLfloat lightPosition[] = { 0.0f, 0.0f, 10.0f, 1.0f };  // Light positioned in front of camera
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
-	// Sich will be assigneet Material Properties whd by glColor
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	// Set light properties
+	GLfloat lightAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	GLfloat lightDiffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat lightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	// Set Material's Specular Color
-	// Will be applied to all objects
-	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-
-	// Set Material's Shine value (0->128)
-	GLfloat shininess[] = { 96.0f };
-	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
 }
 
-//=======================================================================
-// OpengGL Configuration Function
-//=======================================================================
 void myInit(void)
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -425,30 +375,18 @@ void myInit(void)
 	glLoadIdentity();
 
 	gluPerspective(fovy, aspectRatio, zNear, zFar);
-	//*******************************************************************************************//
-	// fovy:			Angle between the bottom and top of the projectors, in degrees.			 //
-	// aspectRatio:		Ratio of width to height of the clipping plane.							 //
-	// zNear and zFar:	Specify the front and back clipping planes distances from camera.		 //
-	//*******************************************************************************************//
 
 	glMatrixMode(GL_MODELVIEW);
 
 	glLoadIdentity();
 
 	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
-	//*******************************************************************************************//
-	// EYE (ex, ey, ez): defines the location of the camera.									 //
-	// AT (ax, ay, az):	 denotes the direction where the camera is aiming at.					 //
-	// UP (ux, uy, uz):  denotes the upward orientation of the camera.							 //
-	//*******************************************************************************************//
-
-	InitLightSource();
-
-	InitMaterial();
 
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_NORMALIZE);
+
+	initMaterials();
 
 	LoadAssets();
 
@@ -456,37 +394,6 @@ void myInit(void)
 }
 
 
-//=======================================================================
-// Render Ground Function
-//=======================================================================
-void RenderGround()
-{
-	glDisable(GL_LIGHTING);	// Disable lighting 
-
-	glColor3f(0.6, 0.6, 0.6);	// Dim the ground texture a bit
-
-	glEnable(GL_TEXTURE_2D);	// Enable 2D texturing
-
-	glBindTexture(GL_TEXTURE_2D, tex_ground.texture[0]);	// Bind the ground texture
-
-	glPushMatrix();
-	glBegin(GL_QUADS);
-	glNormal3f(0, 1, 0);	// Set quad normal direction.
-	glTexCoord2f(0, 0);		// Set tex coordinates ( Using (0,0) -> (5,5) with texture wrapping set to GL_REPEAT to simulate the ground repeated grass texture).
-	glVertex3f(-20, 0, -20);
-	glTexCoord2f(5, 0);
-	glVertex3f(20, 0, -20);
-	glTexCoord2f(5, 5);
-	glVertex3f(20, 0, 20);
-	glTexCoord2f(0, 5);
-	glVertex3f(-20, 0, 20);
-	glEnd();
-	glPopMatrix();
-
-	glEnable(GL_LIGHTING);	// Enable lighting again for other entites coming throung the pipeline.
-
-	glColor3f(1, 1, 1);	// Set material back to white instead of grey used for the ground texture.
-}
 
 void renderMap2() {
 	//SIDE 1
@@ -673,6 +580,7 @@ void displayText(float x, float y, int r, int g, int b, const char* string) {
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 	}
 	glEnable(GL_DEPTH_TEST);
+	glColor3f(1, 1, 1);
 }
 
 void drawButton(float x, float y, float width, float height, const char* text, void (*callback)()) {
@@ -684,6 +592,7 @@ void drawButton(float x, float y, float width, float height, const char* text, v
     glVertex2f(x + width/2, y + height/2);      // Top right
     glVertex2f(x - width/2, y + height/2);      // Top left
     glEnd();
+	glColor3f(1, 1, 1);
 
     // Draw button border
     glColor3f(0.4f, 0.4f, 0.4f); // Darker gray for border
@@ -694,6 +603,7 @@ void drawButton(float x, float y, float width, float height, const char* text, v
     glVertex2f(x + width/2, y + height/2);
     glVertex2f(x - width/2, y + height/2);
     glEnd();
+	glColor3f(1, 1, 1);
 
 	glDisable(GL_DEPTH_TEST);
     // Draw button text
@@ -706,14 +616,14 @@ void drawButton(float x, float y, float width, float height, const char* text, v
     for (int i = 0; text[i] != '\0'; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
     }
+	glColor3f(1, 1, 1);
 	glEnable(GL_DEPTH_TEST);
 }
 
 void drawMainMenu() {
-	glClearColor(0.5, 0.5, 0.5, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
+	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glLoadIdentity();
 	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT); // Set up an orthographic projection
 
@@ -740,12 +650,11 @@ void drawMainMenu() {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-//=======================================================================
-// Display Function
-//=======================================================================
 void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	setupLights();
 
 	// if current display mode is MAIN_MENU, show gray screen with text
 	if(currentDisplayMode == MAIN_MENU) {
@@ -754,14 +663,6 @@ void myDisplay(void)
 		return;
 	}
 	else if(currentDisplayMode == MAP_1) {
-		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
-		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
-		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
-
-		// Draw Ground
-		//RenderGround();
-
 		// Draw Player Model
 		glPushMatrix();
 		glScalef(2, 2, 2);
@@ -770,15 +671,6 @@ void myDisplay(void)
 		model_player.Draw();
 		glPopMatrix();
 		drawPlayer();
-
-		//// Draw Enemy Model
-		//glPushMatrix();
-		//glTranslatef(0, 0, 10);
-		//glScalef(0.5, 0.5, 0.5);
-		//glRotatef(-90, 0, 1, 0);
-		//model_enemy.Draw();
-		//glPopMatrix();
-
 
 		// Draw Map Model
 		renderMap1();
@@ -805,14 +697,7 @@ void myDisplay(void)
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
-		//GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
-		//GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
-		//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-		//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
-		
-		// Draw Ground
-		//RenderGround();
-		
+	
 		// Draw Player Model
 		glPushMatrix();
 		glScalef(2, 2, 2);
@@ -851,15 +736,10 @@ void myDisplay(void)
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
-
-
 		glutSwapBuffers();
 	}
 }
 
-//=======================================================================
-// Keyboard Function
-//=======================================================================
 void myKeyboard(unsigned char button, int x, int y)
 {
 	keyState[button] = true; // Mark key as pressed
@@ -977,9 +857,6 @@ void updateMovement() {
 	playerRigidBody->setLinearVelocity(newVelocity);
 }
 
-//=======================================================================
-// Motion Function
-//=======================================================================
 void myMotion(int x, int y)
 {
 	if (!mouseEnabled) return;
@@ -1009,9 +886,6 @@ void myMotion(int x, int y)
 	glutPostRedisplay();
 }
 
-//=======================================================================
-// Mouse Function
-//=======================================================================
 void myMouse(int button, int state, int x, int y)
 {
 	// Convert screen coordinates to OpenGL coordinates
@@ -1039,9 +913,6 @@ void myMouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
-//=======================================================================
-// Reshape Function
-//=======================================================================
 void myReshape(int w, int h)
 {
 	if (h == 0) {
@@ -1078,9 +949,7 @@ void onUpdate(int value) {
     glutTimerFunc(7, onUpdate, 0);  // ~144 FPS
 }
 
-//=======================================================================
-// Main Function
-//=======================================================================
+
 void main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
