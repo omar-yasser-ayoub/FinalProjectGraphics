@@ -111,7 +111,7 @@ void playerPhysics() {
 	btDefaultMotionState* playerMotionState =
 		new btDefaultMotionState(btTransform(
 			btQuaternion(0, 0, 0, 1),
-			btVector3(0, 5, 0) // slightly above the ground
+			btVector3(0, 1, 0) // slightly above the ground
 		));
 
 	// Define player mass and inertia
@@ -164,6 +164,36 @@ void addStaticBody(const Model_3DS& model, const btVector3& position, const btVe
 	// Add to dynamics world
 	dynamicsWorld->addRigidBody(rigidBody);
 }
+
+void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, const btVector3& scale) {
+	// Create triangle mesh
+	btTriangleMesh* triangleMesh = model.CreateBulletTriangleMesh();
+	if (!triangleMesh) {
+		printf("Failed to create triangle mesh\n");
+		return;
+	}
+
+	// Create triangle mesh shape with scaling
+	btBvhTriangleMeshShape* meshShape = new btBvhTriangleMeshShape(triangleMesh, true);
+	btScaledBvhTriangleMeshShape* scaledMeshShape = new btScaledBvhTriangleMeshShape(meshShape, scale);
+
+	// Create motion state (position of the object)
+	btDefaultMotionState* motionState = new btDefaultMotionState(
+		btTransform(btQuaternion(0, 0, 0, 1), position)
+	);
+
+	// Create rigid body construction info (mass = 0 for static bodies)
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(
+		0, motionState, scaledMeshShape, btVector3(0, 0, 0)
+	);
+
+	// Create rigid body
+	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
+
+	// Add to dynamics world
+	dynamicsWorld->addRigidBody(rigidBody);
+}
+
 
 // Initialize Bullet Physics world
 void initPhysicsWorld() {
@@ -226,10 +256,10 @@ void initPhysicsWorld() {
 	dynamicsWorld->addRigidBody(rigidBody);
 
 	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5));   // model_crate1
-	addStaticBody(model_crate2, btVector3(5, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
-	addStaticBody(model_crate2, btVector3(15, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
-	addStaticBody(model_crate3, btVector3(5, 0, 5), btVector3(0.5, 0.5, 0.5));    // model_crate3
-	addStaticBody(model_crate3, btVector3(15, 0, 5), btVector3(0.5, 0.5, 0.5));   // model_crate3
+	addStaticBodyTriangleMesh(model_crate2, btVector3(5, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
+	addStaticBodyTriangleMesh(model_crate2, btVector3(15, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
+	addStaticBodyTriangleMesh(model_crate3, btVector3(5, 0, 5), btVector3(0.5, 0.5, 0.5));    // model_crate3
+	addStaticBodyTriangleMesh(model_crate3, btVector3(15, 0, 5), btVector3(0.5, 0.5, 0.5));   // model_crate3
 	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7));        // model_car
 	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01));// model_bench
 	//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075)); // model_bench1
