@@ -242,10 +242,6 @@ void initPhysicsWorld() {
 	dynamicsWorld->addRigidBody(rigidBody);
 
 	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5));   // model_crate1
-	addStaticBodyTriangleMesh(model_crate2, btVector3(5, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
-	addStaticBodyTriangleMesh(model_crate2, btVector3(15, 0, -10), btVector3(0.075, 0.075, 0.075)); // model_crate2
-	addStaticBodyTriangleMesh(model_crate3, btVector3(5, 0, 5), btVector3(0.5, 0.5, 0.5));    // model_crate3
-	addStaticBodyTriangleMesh(model_crate3, btVector3(15, 0, 5), btVector3(0.5, 0.5, 0.5));   // model_crate3
 	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7));        // model_car
 	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01));// model_bench
 	//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075)); // model_bench1
@@ -297,11 +293,9 @@ void LoadAssets()
 	//// Loading Map2 files
 	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
 	model_crate1.Load("Models/Scene2/crate1/crate.3ds");
-	model_crate2.Load("Models/Scene2/crate2/crate.3ds");
-	model_crate3.Load("Models/Scene2/crate3/crate.3ds");
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
-	model_map2.Load("Models/Scene2/Map/map3.3ds");
+	model_map2.Load("Models/Scene2/Map/map5.3ds");
 
 	//// Loading Map1 files
 	model_map1.Load("Models/Scene1/Map/map.3ds");
@@ -403,45 +397,7 @@ void renderMap2() {
 	model_crate1.Draw();
 	glPopMatrix();
 
-	// Draw Crate Model
-	glPushMatrix();
-	glTranslatef(5, 0, -10);
-	glRotatef(90, 1, 0, 0);
-	glScalef(0.075, 0.075, 0.075);
-	model_crate2.Draw();
-	glPopMatrix();
-
-	// Draw Crate Model
-	glPushMatrix();
-	glTranslatef(15, 0, -10);
-	glRotatef(90, 1, 0, 0);
-	glScalef(0.075, 0.075, 0.075);
-	model_crate2.Draw();
-	glPopMatrix();
-
 	//SIDE 2
-
-	// Draw Crate Model
-	glPushMatrix();
-	glTranslatef(5, 0, 5);
-	glRotatef(-90, 1, 0, 0);
-	glScalef(0.5, 0.5, 0.5);
-	glPushMatrix();
-	glRotatef(90, 0, 0, 1);
-	model_crate3.Draw();
-	glPopMatrix();
-	glPopMatrix();
-
-	// Draw Crate Model
-	glPushMatrix();
-	glTranslatef(15, 0, 5);
-	glRotatef(-90, 1, 0, 0);
-	glScalef(0.5, 0.5, 0.5);
-	glPushMatrix();
-	glRotatef(90, 0, 0, 1);
-	model_crate3.Draw();
-	glPopMatrix();
-	glPopMatrix();
 
 	// Draw Car Model
 	glPushMatrix();
