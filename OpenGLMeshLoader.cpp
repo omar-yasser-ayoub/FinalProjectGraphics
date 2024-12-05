@@ -78,7 +78,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 int lastX = WIDTH / 2;
 int lastY = HEIGHT / 2;
-mode currentMode = FIRST_PERSON;
+mode currentMode = THIRD_PERSON;
 
 enum displayMode {
 	MAIN_MENU,
