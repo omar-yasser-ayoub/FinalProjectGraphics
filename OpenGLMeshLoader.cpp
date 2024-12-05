@@ -85,13 +85,21 @@ enum mode {
 	THIRD_PERSON,
 };
 
-bool mouseEnabled = true;
+bool mouseEnabled = false;
 float sensitivity = 0.1f;
 float yaw = -90.0f;
 float pitch = 0.0f;
 int lastX = WIDTH / 2;
 int lastY = HEIGHT / 2;
 mode currentMode = FIRST_PERSON;
+
+enum displayMode {
+	MAIN_MENU,
+	MAP_1,
+	MAP_2,
+};
+
+displayMode currentDisplayMode = MAIN_MENU;
 
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
@@ -302,6 +310,7 @@ void LoadAssets()
 	tex_ground.Load("Textures/ground.bmp");
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
+
 //=======================================================================
 // Lighting Configuration Function
 //=======================================================================
@@ -601,6 +610,84 @@ void drawPlayer() {
 		At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
 	}
 }
+
+void displayText(float x, float y, int r, int g, int b, const char* string) {
+	int j = strlen(string);
+
+	glDisable(GL_DEPTH_TEST);
+	glColor3f(r, g, b);
+	glRasterPos2f(x, y);
+	for (int i = 0; i < j; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+	}
+	glEnable(GL_DEPTH_TEST);
+}
+
+void drawButton(float x, float y, float width, float height, const char* text, void (*callback)()) {
+    // Draw button background
+    glColor3f(0.7f, 0.7f, 0.7f); // Light gray color for button
+    glBegin(GL_QUADS);
+    glVertex2f(x - width/2, y - height/2);      // Bottom left
+    glVertex2f(x + width/2, y - height/2);      // Bottom right
+    glVertex2f(x + width/2, y + height/2);      // Top right
+    glVertex2f(x - width/2, y + height/2);      // Top left
+    glEnd();
+
+    // Draw button border
+    glColor3f(0.4f, 0.4f, 0.4f); // Darker gray for border
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x - width/2, y - height/2);
+    glVertex2f(x + width/2, y - height/2);
+    glVertex2f(x + width/2, y + height/2);
+    glVertex2f(x - width/2, y + height/2);
+    glEnd();
+
+	glDisable(GL_DEPTH_TEST);
+    // Draw button text
+    glColor3f(0.0f, 0.0f, 0.0f); // Black text
+    float textX = x - (glutBitmapLength(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text) / 2.0f);
+    float textY = y - 10; // Adjust vertical position to center text
+    glRasterPos2f(textX, textY);
+    
+    // Display text character by character
+    for (int i = 0; text[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
+    }
+	glEnable(GL_DEPTH_TEST);
+}
+
+void drawMainMenu() {
+	glClearColor(0.5, 0.5, 0.5, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT); // Set up an orthographic projection
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	displayText(-100, 150, 1, 1, 1, "Pick a game mode");
+
+	// button for map 1
+	drawButton(0, 70, 200, 50, "Map 1", []() {
+		currentDisplayMode = MAP_1;
+	});
+
+	// button for map 2
+	drawButton(0, -70, 200, 50, "Map 2", []() {
+		currentDisplayMode = MAP_2;
+	});
+
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
 //=======================================================================
 // Display Function
 //=======================================================================
@@ -608,57 +695,114 @@ void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// if current display mode is MAIN_MENU, show gray screen with text
+	if(currentDisplayMode == MAIN_MENU) {
+		drawMainMenu();
+		glutSwapBuffers();
+		return;
+	}
+	else if(currentDisplayMode == MAP_1) {
+		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
+		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
+		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+
+		// Draw Ground
+		//RenderGround();
+
+		// Draw Player Model
+		glPushMatrix();
+		glScalef(2, 2, 2);
+		glTranslatef(0, 0, 2.5);
+		glRotatef(90, 1, 0, 0);
+		model_player.Draw();
+		glPopMatrix();
+		drawPlayer();
+
+		//// Draw Enemy Model
+		//glPushMatrix();
+		//glTranslatef(0, 0, 10);
+		//glScalef(0.5, 0.5, 0.5);
+		//glRotatef(-90, 0, 1, 0);
+		//model_enemy.Draw();
+		//glPopMatrix();
 
 
-	//GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
-	//GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
-	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+		// Draw Map Model
+		renderMap1();
 
-	// Draw Ground
-	//RenderGround();
+		//sky box
+		glPushMatrix();
 
-	// Draw Player Model
-	glPushMatrix();
-	glScalef(2, 2, 2);
-	glTranslatef(0, 0, 2.5);
-	glRotatef(90, 1, 0, 0);
-	model_player.Draw();
-	glPopMatrix();
-	drawPlayer();
+		GLUquadricObj* qobj;
+		qobj = gluNewQuadric();
+		glTranslated(50, 0, 0);
+		glRotated(90, 1, 0, 1);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		gluQuadricTexture(qobj, true);
+		gluQuadricNormals(qobj, GL_SMOOTH);
+		gluSphere(qobj, 200, 100, 100);
+		gluDeleteQuadric(qobj);
 
-	//// Draw Enemy Model
-	//glPushMatrix();
-	//glTranslatef(0, 0, 10);
-	//glScalef(0.5, 0.5, 0.5);
-	//glRotatef(-90, 0, 1, 0);
-	//model_enemy.Draw();
-	//glPopMatrix();
+		glPopMatrix();
+
+		// Optional: Add physics debug drawing
+		dynamicsWorld->debugDrawWorld();
 
 
-	// Draw Map Model
-	renderMap2();
+		glutSwapBuffers();
+	}
+	else if(currentDisplayMode == MAP_2) {
+		//GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
+		//GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
+		//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+		//glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+		
+		// Draw Ground
+		//RenderGround();
+		
+		// Draw Player Model
+		glPushMatrix();
+		glScalef(2, 2, 2);
+		glTranslatef(0, 0, 2.5);
+		glRotatef(90, 1, 0, 0);
+		model_player.Draw();
+		glPopMatrix();
+		drawPlayer();
 
-	//sky box
-	glPushMatrix();
-
-	GLUquadricObj* qobj;
-	qobj = gluNewQuadric();
-	glTranslated(50, 0, 0);
-	glRotated(90, 1, 0, 1);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	gluQuadricTexture(qobj, true);
-	gluQuadricNormals(qobj, GL_SMOOTH);
-	gluSphere(qobj, 200, 100, 100);
-	gluDeleteQuadric(qobj);
-
-	glPopMatrix();
-
-	// Optional: Add physics debug drawing
-	dynamicsWorld->debugDrawWorld();
+		//// Draw Enemy Model
+		//glPushMatrix();
+		//glTranslatef(0, 0, 10);
+		//glScalef(0.5, 0.5, 0.5);
+		//glRotatef(-90, 0, 1, 0);
+		//model_enemy.Draw();
+		//glPopMatrix();
 
 
-	glutSwapBuffers();
+		// Draw Map Model
+		renderMap2();
+
+		//sky box
+		glPushMatrix();
+
+		GLUquadricObj* qobj;
+		qobj = gluNewQuadric();
+		glTranslated(50, 0, 0);
+		glRotated(90, 1, 0, 1);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		gluQuadricTexture(qobj, true);
+		gluQuadricNormals(qobj, GL_SMOOTH);
+		gluSphere(qobj, 200, 100, 100);
+		gluDeleteQuadric(qobj);
+
+		glPopMatrix();
+
+		// Optional: Add physics debug drawing
+		dynamicsWorld->debugDrawWorld();
+
+
+		glutSwapBuffers();
+	}
 }
 
 //=======================================================================
@@ -780,6 +924,7 @@ void updateMovement() {
 	newVelocity.setY(playerRigidBody->getLinearVelocity().y()); // Preserve vertical velocity
 	playerRigidBody->setLinearVelocity(newVelocity);
 }
+
 //=======================================================================
 // Motion Function
 //=======================================================================
@@ -817,10 +962,28 @@ void myMotion(int x, int y)
 //=======================================================================
 void myMouse(int button, int state, int x, int y)
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-	{
-		// Do Something here
+	// Convert screen coordinates to OpenGL coordinates
+	float glX = (x - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
+	float glY = (HEIGHT / 2.0f - y) * (HEIGHT / (float)HEIGHT);
+
+	// Check if mouse click is within button bounds
+	// Example for Map 1 button
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		// Button coordinates match those in drawMainMenu
+		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
+			printf("Map 1 clicked\n");
+			currentDisplayMode = MAP_1;
+			mouseEnabled = true;
+		}
+
+		// Similar check for Map 2 button
+		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
+			printf("Map 2 clicked\n");
+			currentDisplayMode = MAP_2;
+			mouseEnabled = true;
+		}
 	}
+
 	glutPostRedisplay();
 }
 
