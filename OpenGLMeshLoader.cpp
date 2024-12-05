@@ -393,8 +393,6 @@ void myInit(void)
 	initPhysicsWorld(); // Initialize Bullet Physics
 }
 
-
-
 void renderMap2() {
 	//SIDE 1
 
@@ -625,7 +623,7 @@ void drawMainMenu() {
 	glPushMatrix();
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glLoadIdentity();
-	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT); // Set up an orthographic projection
+	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
