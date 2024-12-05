@@ -505,6 +505,50 @@ void renderMap1() {
 
 }
 
+void DrawCrosshair(int screenWidth, int screenHeight) {
+	// Disable depth testing to ensure the crosshair is always visible
+	glDisable(GL_DEPTH_TEST);
+
+	// Set up orthographic projection for 2D rendering
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0, screenWidth, 0, screenHeight); // Screen-space coordinates
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// Set crosshair color (e.g., white)
+	glColor3f(0, 1.0f, 0);
+
+	// Crosshair size and position
+	float crosshairSize = 10.0f;  // Size of the crosshair
+	float centerX = screenWidth / 2.0f;
+	float centerY = screenHeight / 2.0f;
+
+	// Draw the crosshair (two lines)
+	glBegin(GL_LINES);
+	// Horizontal line
+	glVertex2f(centerX - crosshairSize, centerY);
+	glVertex2f(centerX + crosshairSize, centerY);
+
+	// Vertical line
+	glVertex2f(centerX, centerY - crosshairSize);
+	glVertex2f(centerX, centerY + crosshairSize);
+	glEnd();
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	// Restore previous matrix modes
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+	// Re-enable depth testing
+	glEnable(GL_DEPTH_TEST);
+}
+
 void drawPlayer() {
     // Update player position and rotation from physics simulation
     if (playerRigidBody) {
@@ -676,6 +720,8 @@ void myDisplay(void)
 
 		glPopMatrix();
 
+		DrawCrosshair(WIDTH, HEIGHT);
+
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
 
@@ -719,6 +765,8 @@ void myDisplay(void)
 		gluDeleteQuadric(qobj);
 
 		glPopMatrix();
+
+		DrawCrosshair(WIDTH, HEIGHT);
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
