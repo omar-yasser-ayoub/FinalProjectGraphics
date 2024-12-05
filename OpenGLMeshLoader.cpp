@@ -113,7 +113,7 @@ void playerPhysics() {
 
 	// Adjust some properties to make player movement more realistic
 	playerRigidBodyCI.m_restitution = 0.1f; // Slight bounciness
-	playerRigidBodyCI.m_friction = 2.0f; // Ground friction
+	playerRigidBodyCI.m_friction = 0.2f; // Ground friction
 
 	// Create player rigid body
 	playerRigidBody = new btRigidBody(playerRigidBodyCI);
@@ -246,7 +246,6 @@ void initPhysicsWorld() {
 	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01));// model_bench
 	//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075)); // model_bench1
 	//addStaticBody(model_boxes, btVector3(5, 2, 5), btVector3(0.1, 0.1, 0.1));    // model_boxes
-	//addStaticBody(model_weapon, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1));    // model_weapon
 	//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1));    // model_munitions
 	//addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5));   // model_planks
 	//addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1));   // model_supplies
@@ -507,21 +506,60 @@ void renderMap1() {
 }
 
 void drawPlayer() {
-	// Update player position from physics simulation
-	if (playerRigidBody) {
-		btTransform trans;
-		playerRigidBody->getMotionState()->getWorldTransform(trans);
+    // Update player position and rotation from physics simulation
+    if (playerRigidBody) {
+        btTransform trans;
+        playerRigidBody->getMotionState()->getWorldTransform(trans);
 
-		// Update Eye position based on player rigid body
-		Eye.x = trans.getOrigin().x();
-		Eye.y = trans.getOrigin().y() + 3; // Adjust height as needed
-		Eye.z = trans.getOrigin().z();
+		if (currentMode == THIRD_PERSON) {
+			glPushMatrix();
+			// Translate to player's position
+			glTranslatef(trans.getOrigin().x(), trans.getOrigin().y(), trans.getOrigin().z());
+			// Apply additional scaling and fixed rotations
+			glScalef(2, 2, 2);
+			glRotatef(90, 1, 0, 0);
+			glRotatef(180, 0, 0, 1);
 
-		// Update At position to maintain camera direction
-		At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
-		At.y = Eye.y + sin(radians(pitch));
-		At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
-	}
+			// Draw the player model
+			model_player.Draw();
+
+			glPopMatrix();
+		}
+		if (currentMode == FIRST_PERSON) {
+
+			glPushMatrix();
+
+			glLoadIdentity();
+			
+			//disable depth testing
+			
+
+			float weaponOffsetX = 0.3f;
+			float weaponOffsetY = -0.4f;
+			float weaponOffsetZ = -0.5f;
+
+			glTranslatef(weaponOffsetX, weaponOffsetY, weaponOffsetZ);
+
+
+			glScalef(0.01f, 0.01f, 0.01f);
+			glRotatef(180, 0, 1, 0); 
+
+			model_weapon.Draw();
+
+			
+			glPopMatrix();
+		}
+
+        // Update Eye position based on player rigid body
+        Eye.x = trans.getOrigin().x();
+        Eye.y = trans.getOrigin().y() + 3; // Adjust height as needed
+        Eye.z = trans.getOrigin().z();
+
+        // Update At position to maintain camera direction
+        At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+        At.y = Eye.y + sin(radians(pitch));
+        At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+    }
 }
 
 void displayText(float x, float y, int r, int g, int b, const char* string) {
@@ -618,12 +656,6 @@ void myDisplay(void)
 	}
 	else if(currentDisplayMode == MAP_1) {
 		// Draw Player Model
-		glPushMatrix();
-		glScalef(2, 2, 2);
-		glTranslatef(0, 0, 2.5);
-		glRotatef(90, 1, 0, 0);
-		model_player.Draw();
-		glPopMatrix();
 		drawPlayer();
 
 		// Draw Map Model
@@ -714,11 +746,6 @@ void myKeyboard(unsigned char button, int x, int y)
 		glutReshapeWindow(800, 600);
 		glutPositionWindow(100, 100);
 	}
-	if (button == ' ') {
-		if (abs(playerRigidBody->getLinearVelocity().y()) < 0.1f) {
-			playerRigidBody->applyCentralImpulse(btVector3(0, 1000, 0)); // Jump impulse
-		}
-	}
 	glutPostRedisplay();
 	//if (!playerRigidBody) return;
 
@@ -792,6 +819,11 @@ void updateMovement() {
 	if (keyState['s']) moveDirection += btVector3(-1, 0, 0);  // Backward
 	if (keyState['a']) moveDirection += btVector3(0, 0, 1); // Left
 	if (keyState['d']) moveDirection += btVector3(0, 0, -1);  // Right
+	if (keyState[' ']) {
+		if (abs(playerRigidBody->getLinearVelocity().y()) < 0.1f) {
+			playerRigidBody->applyCentralImpulse(btVector3(0, 1000, 0)); // Jump impulse
+		}
+	}
 
 	// Normalize the movement direction
 	if (moveDirection.length() > 0) {
@@ -854,6 +886,7 @@ void myMouse(int button, int state, int x, int y)
 			printf("Map 1 clicked\n");
 			currentDisplayMode = MAP_1;
 			mouseEnabled = true;
+			glutSetCursor(GLUT_CURSOR_NONE);
 		}
 
 		// Similar check for Map 2 button
@@ -861,6 +894,7 @@ void myMouse(int button, int state, int x, int y)
 			printf("Map 2 clicked\n");
 			currentDisplayMode = MAP_2;
 			mouseEnabled = true;
+			glutSetCursor(GLUT_CURSOR_NONE);
 		}
 	}
 
@@ -902,7 +936,6 @@ void onUpdate(int value) {
     // Set up the next timer event
     glutTimerFunc(7, onUpdate, 0);  // ~144 FPS
 }
-
 
 void main(int argc, char** argv)
 {
