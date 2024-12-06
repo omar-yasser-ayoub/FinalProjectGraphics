@@ -707,6 +707,7 @@ void drawPlayer() {
 			glScalef(2, 2, 2);
 			glRotatef(90, 1, 0, 0);
 			glRotatef(180, 0, 0, 1);
+			glRotatef(yaw + 90, 0, 0, 1); // Rotate around Y-axis (yaw)
 
 			// Draw the player model
 			model_player.Draw();
@@ -873,15 +874,6 @@ void myDisplay(void)
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
-	
-		// Draw Player Model
-		glPushMatrix();
-		glScalef(2, 2, 2);
-		glTranslatef(0, 0, 2.5);
-		glRotatef(90, 1, 0, 0);
-		model_player.Draw();
-		glPopMatrix();
-		drawPlayer();
 
 		//// Draw Enemy Model
 		//glPushMatrix();
