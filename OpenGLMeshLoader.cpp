@@ -106,6 +106,7 @@ Model_3DS model_target;
 Model_3DS model_chair;
 Model_3DS model_muzzle;
 Model_3DS model_skybox;
+Model_3DS model_bulletCasing;
 GLTexture tex_ground;
 
 enum mode {
@@ -137,6 +138,7 @@ float bobAmount = 0.05f;
 float swayAmount = 0.01f;
 float oldTime = 0.0f;
 
+
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
@@ -149,7 +151,7 @@ void playerPhysics() {
 	btDefaultMotionState* playerMotionState =
 		new btDefaultMotionState(btTransform(
 			btQuaternion(0, 0, 0, 1),
-			btVector3(0, 1, 0) // slightly above the ground
+			btVector3(0, 2, 0) // slightly above the ground
 		));
 
 	// Define player mass and inertia
@@ -453,6 +455,8 @@ void LoadAssets()
 	model_player.Load("Models/Scene2/Player/player4.3ds");
 	model_player.SwapFirstandSecondObjects();
 	model_player.numObjects = 1;
+
+	model_bulletCasing.Load("Models/Scene2/Bullet/bullet.3ds");
 
 	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
 	model_skybox.Load("Models/Scene1/SkyBoxMap/skybox.3ds");
@@ -760,13 +764,20 @@ void drawPlayer() {
 			model_weapon.Draw();
 
 			// Draw the muzzle flash if the player is shooting
-			if (mouseState[GLUT_LEFT_BUTTON]) {  // Assuming `isShooting` is true when the player fires
+			if (mouseState[GLUT_LEFT_BUTTON]) { 
+				glPushMatrix();
+				glScalef(10.0f, 10.0f, 10.0f);
+				glTranslatef(2.0f, 0.0f, 0.0f);
+				glRotatef(-45, 0, 1, 0);
+				model_bulletCasing.Draw();
+				glPopMatrix();
+
 				glPushMatrix();
 				// Translate muzzle flash in front of the weapon
 				glTranslatef(2.0f, 10.0f, 50.0f); // Adjust this for proper position in front of the weapon
 
 				glScalef(4.0f, 4.0f, 4.0f);
-				// Draw a simple sphere (you can replace this with a model or particle system)
+
 				model_muzzle.Draw();
 
 				// Disable blending after drawing the muzzle flash
