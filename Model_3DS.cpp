@@ -381,7 +381,15 @@ void Model_3DS::Load(char *name)
 	CalculateBoundingBox();
 }
 
+void Model_3DS::SwapFirstandSecondObjects() {
+	if (numObjects < 2) {
+		return;
+	}
 
+	Object temp = Objects[0];
+	Objects[0] = Objects[1];
+	Objects[1] = temp;
+}
 
 void Model_3DS::Draw()
 {

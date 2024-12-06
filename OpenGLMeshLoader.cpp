@@ -450,7 +450,10 @@ void updatePhysics(float deltaTime) {
 
 void LoadAssets()
 {
-	model_player.Load("Models/Scene2/Player/player2.3ds");
+	model_player.Load("Models/Scene2/Player/player3.3ds");
+	model_player.SwapFirstandSecondObjects();
+	model_player.numObjects = 1;
+
 	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
 	model_skybox.Load("Models/Scene1/SkyBoxMap/skybox.3ds");
 
