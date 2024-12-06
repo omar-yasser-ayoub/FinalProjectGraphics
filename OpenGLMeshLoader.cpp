@@ -19,6 +19,7 @@ GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 250;
 std::unordered_map<unsigned char, bool> keyState;
+std::unordered_map<int, bool> mouseState;
 std::vector<Model_3DS> models;
 btDiscreteDynamicsWorld* dynamicsWorld;
 btRigidBody* groundRigidBody;
@@ -78,7 +79,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 int lastX = WIDTH / 2;
 int lastY = HEIGHT / 2;
-mode currentMode = THIRD_PERSON;
+mode currentMode = FIRST_PERSON;
 
 enum displayMode {
 	MAIN_MENU,
@@ -86,6 +87,9 @@ enum displayMode {
 	MAP_2,
 };
 displayMode currentDisplayMode = MAIN_MENU;
+
+int mouseEventX = 0;
+int mouseEventY = 0;
 
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
@@ -920,33 +924,57 @@ void myMotion(int x, int y)
 	glutPostRedisplay();
 }
 
-void myMouse(int button, int state, int x, int y)
-{
-	// Convert screen coordinates to OpenGL coordinates
-	float glX = (x - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
-	float glY = (HEIGHT / 2.0f - y) * (HEIGHT / (float)HEIGHT);
-
-	// Check if mouse click is within button bounds
-	// Example for Map 1 button
+void myMouse(int button, int state, int x, int y) {
+	// Just set a flag or queue an event instead of doing heavy processing
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		// Button coordinates match those in drawMainMenu
+		mouseState[GLUT_LEFT_BUTTON] = true;
+		mouseEventX = x;
+		mouseEventY = y;
+	}
+	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		mouseState[GLUT_LEFT_BUTTON] = false;
+	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		mouseState[GLUT_RIGHT_BUTTON] = true;
+	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP) {
+		mouseState[GLUT_RIGHT_BUTTON] = false;
+	}
+}
+
+void processMouseEvents() {
+	if (mouseState[GLUT_LEFT_BUTTON] == true) {
+		// Actual menu selection logic here
+		float glX = (mouseEventX - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
+		float glY = (HEIGHT / 2.0f - mouseEventY) * (HEIGHT / (float)HEIGHT);
+
 		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
-			printf("Map 1 clicked\n");
 			currentDisplayMode = MAP_1;
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
 		}
-
-		// Similar check for Map 2 button
 		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
-			printf("Map 2 clicked\n");
 			currentDisplayMode = MAP_2;
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
 		}
 	}
+	if (mouseState[GLUT_RIGHT_BUTTON] == true) {
+		// Actual menu selection logic here
+		float glX = (mouseEventX - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
+		float glY = (HEIGHT / 2.0f - mouseEventY) * (HEIGHT / (float)HEIGHT);
 
-	glutPostRedisplay();
+		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
+			currentDisplayMode = MAP_2;
+			mouseEnabled = true;
+			glutSetCursor(GLUT_CURSOR_NONE);
+		}
+		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
+			currentDisplayMode = MAP_1;
+			mouseEnabled = true;
+			glutSetCursor(GLUT_CURSOR_NONE);
+		}
+	}
 }
 
 void myReshape(int w, int h)
@@ -973,13 +1001,15 @@ void myReshape(int w, int h)
 }
 
 void onUpdate(int value) {
+	// Request a redraw
+	glutPostRedisplay();
+
+	processMouseEvents();
+
     // Update physics simulation
     updatePhysics(1.0f / 144.0f); // Assuming 144 FPS
 
     updateMovement();
-
-    // Request a redraw
-    glutPostRedisplay();
 
     // Set up the next timer event
     glutTimerFunc(7, onUpdate, 0);  // ~144 FPS
