@@ -144,6 +144,12 @@ float enemy3_health = 5.0f;
 float enemy4_health = 5.0f;
 float enemy5_health = 5.0f;
 
+float enemy1_hit = 0;
+float enemy2_hit = 0;
+float enemy3_hit = 0;
+float enemy4_hit = 0;
+float enemy5_hit = 0;
+
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
@@ -810,12 +816,21 @@ void drawPlayer() {
 	}
 }
 
-void drawEnemy(float x, float y, float z) {
+void drawEnemy(float x, float y, float z, float isHit) {
 	glPushMatrix();
 	glTranslatef(x, y, z);
 	glScalef(0.5, 0.5, 0.5);
 
+	if (isHit > 0) {
+		glColor3f(1.0f, 0.0f, 0.0f);
+	}
+	else {
+		glColor3f(1.0f, 1.0f, 1.0f);
+	}
+
 	model_enemy.Draw();
+
+	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glPopMatrix();
 }
@@ -985,15 +1000,15 @@ void myDisplay(void)
 		//glPopMatrix();
 
 		if(enemy1_health > 0)
-			drawEnemy(15, 0, 0);
+			drawEnemy(15, 0, 0, enemy1_hit);
 		if (enemy2_health > 0)
-			drawEnemy(7, 0, -5);
+			drawEnemy(7, 0, -5, enemy2_hit);
 		if (enemy3_health > 0)
-			drawEnemy(5, 5, 22);
+			drawEnemy(5, 5, 22, enemy3_hit);
 		if (enemy4_health > 0)
-			drawEnemy(-2, 1, -20);
+			drawEnemy(-2, 1, -20, enemy4_hit);
 		if (enemy5_health > 0)
-			drawEnemy(26, 5, -28);
+			drawEnemy(26, 5, -28, enemy5_hit);
 
 		glEnable(GL_LIGHT1); // Sunlight
 		glEnable(GL_LIGHT2); // Moonlight
@@ -1356,6 +1371,7 @@ void processMouseEvents() {
 					if (*objectName == "model_enemy_1"){
 						enemy1_health -= 0.1;
 						score++;
+						enemy1_hit = 10;
 						if (enemy1_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1363,6 +1379,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_2"){
 						enemy2_health -= 0.1;
 						score++;
+						enemy2_hit = 10;
 						if (enemy2_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1370,6 +1387,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_3"){
 						enemy3_health -= 0.1;
 						score++;
+						enemy2_hit = 10;
 						if (enemy3_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1377,6 +1395,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_4"){
 						enemy4_health -= 0.1;
 						score++;
+						enemy2_hit = 10;
 						if (enemy4_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1384,6 +1403,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_5"){
 						enemy5_health -= 0.1;
 						score++;
+						enemy2_hit = 10;
 						if (enemy5_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1435,6 +1455,12 @@ void onUpdate(int value) {
 	//checkBulletCollision(playerRigidBody, mapRigidBody);
 
     updateMovement();
+
+	enemy1_hit--;
+	enemy2_hit--;
+	enemy3_hit--;
+	enemy4_hit--;
+	enemy4_hit--;
 
     // Set up the next timer event
     glutTimerFunc(7, onUpdate, 0);  // ~144 FPS
