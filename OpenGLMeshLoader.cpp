@@ -641,6 +641,7 @@ void renderMap1() {
 }
 
 void DrawCrosshair(int screenWidth, int screenHeight) {
+	glDisable(GL_LIGHTING);
 	// Disable depth testing to ensure the crosshair is always visible
 	glDisable(GL_DEPTH_TEST);
 
@@ -682,9 +683,11 @@ void DrawCrosshair(int screenWidth, int screenHeight) {
 
 	// Re-enable depth testing
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
 }
 
 void displayScore() {
+	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -696,6 +699,7 @@ void displayScore() {
 
 	glRasterPos2f(-1.9, 0.9); // Set the position of the text
 
+	glColor3f(1, 1, 1); // Set the text color
 	std::string s = "Score: " + std::to_string(score);
 	for (int i = 0; i < s.length(); i++) {
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[i]);
@@ -705,6 +709,7 @@ void displayScore() {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
 }
 
 void drawPlayer() {
@@ -842,6 +847,7 @@ void displayText(float x, float y, int r, int g, int b, const char* string, void
 	glDisable(GL_DEPTH_TEST);
 	glColor3f(r, g, b);
 	glRasterPos2f(x, y);
+	glColor3f(0, 0, 0);
 	for (int i = 0; i < j; i++) {
 		glutBitmapCharacter(font, string[i]);
 	}
@@ -850,8 +856,10 @@ void displayText(float x, float y, int r, int g, int b, const char* string, void
 }
 
 void drawButton(float x, float y, float width, float height, const char* text, void (*callback)()) {
+	glDisable(GL_LIGHTING);
+	glColor3f(1, 1, 1);
     // Draw button background
-    glColor3f(1.0f, 0.85f, 0.58f); // Light gray color for button
+    glColor3f(0, 0, 0);
     glBegin(GL_QUADS);
     glVertex2f(x - width/2, y - height/2);      // Bottom left
     glVertex2f(x + width/2, y - height/2);      // Bottom right
@@ -861,7 +869,7 @@ void drawButton(float x, float y, float width, float height, const char* text, v
 	glColor3f(1, 1, 1);
 
     // Draw button border
-    glColor3f(0.4f, 0.4f, 0.4f); // Darker gray for border
+    glColor3f(0, 0, 0);
     glLineWidth(2.0f);
     glBegin(GL_LINE_LOOP);
     glVertex2f(x - width/2, y - height/2);
@@ -879,12 +887,15 @@ void drawButton(float x, float y, float width, float height, const char* text, v
     
     // Display text character by character
     for (int i = 0; text[i] != '\0'; i++) {
+		glColor3f(1, 1, 1);
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
     }
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
 }
 
 void drawMainMenu() {
+	glDisable(GL_LIGHTING);
 	glClearColor(1, 1, 1, 1.0);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -896,8 +907,8 @@ void drawMainMenu() {
 	glPushMatrix();
 	glLoadIdentity();
 
-	displayText(-60, 150, 1, 1, 1, "GUC Strike", GLUT_BITMAP_TIMES_ROMAN_24);
-	displayText(-90, 50, 1, 1, 1, "Pick a game mode", GLUT_BITMAP_TIMES_ROMAN_24);
+	displayText(-60, 150, 0, 0, 0, "GUC Strike", GLUT_BITMAP_TIMES_ROMAN_24);
+	displayText(-90, 50, 0, 0, 0, "Pick a game mode", GLUT_BITMAP_TIMES_ROMAN_24);
 
 	// button for map 1
 	drawButton(-150, -50, 200, 50, "Train", []() {
@@ -914,6 +925,7 @@ void drawMainMenu() {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_LIGHTING);
 }
 
 void displayWinScreen() {
