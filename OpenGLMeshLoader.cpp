@@ -137,6 +137,12 @@ float bobAmount = 0.05f;
 float swayAmount = 0.01f;
 float oldTime = 0.0f;
 
+float enemy1_health = 5.0f;
+float enemy2_health = 5.0f;
+float enemy3_health = 5.0f;
+float enemy4_health = 5.0f;
+float enemy5_health = 5.0f;
+
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
@@ -412,8 +418,11 @@ void initPhysicsWorld(int map) {
 		addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7), "model_car"); // model_car
 		addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01), "model_bench"); // model_bench
 		addStaticBodyTriangleMesh(model_enemy, btVector3(15, 0, 0), btVector3(0.5, 0.5, 0.5), "model_enemy_1");
+		addStaticBodyTriangleMesh(model_enemy, btVector3(7, 0, -5), btVector3(0.5, 0.5, 0.5), "model_enemy_2");
+		addStaticBodyTriangleMesh(model_enemy, btVector3(5, 5, 22), btVector3(0.5, 0.5, 0.5), "model_enemy_3");
+		addStaticBodyTriangleMesh(model_enemy, btVector3(-2, 1, -20), btVector3(0.5, 0.5, 0.5), "model_enemy_4");
+		addStaticBodyTriangleMesh(model_enemy, btVector3(26, 5, -28), btVector3(0.5, 0.5, 0.5), "model_enemy_5");
 		playerPhysics();
-
 	}
 
 	
@@ -792,12 +801,10 @@ void drawPlayer() {
 }
 
 void drawEnemy(float x, float y, float z) {
-	// Render the enemy
 	glPushMatrix();
 	glTranslatef(x, y, z);
 	glScalef(0.5, 0.5, 0.5);
 
-	// Assuming you have a model for the enemy
 	model_enemy.Draw();
 
 	glPopMatrix();
@@ -967,7 +974,16 @@ void myDisplay(void)
 		//model_enemy.Draw();
 		//glPopMatrix();
 
-		drawEnemy(15, 0, 0);
+		if(enemy1_health > 0)
+			drawEnemy(15, 0, 0);
+		if (enemy2_health > 0)
+			drawEnemy(7, 0, -5);
+		if (enemy3_health > 0)
+			drawEnemy(5, 5, 22);
+		if (enemy4_health > 0)
+			drawEnemy(-2, 1, -20);
+		if (enemy5_health > 0)
+			drawEnemy(26, 5, -28);
 
 		glEnable(GL_LIGHT1); // Sunlight
 		glEnable(GL_LIGHT2); // Moonlight
@@ -1258,6 +1274,26 @@ btVector3 calculateRayTo(int x, int y, int WIDTH, int HEIGHT, const Vector& Eye,
 	return Eye.toBtVector3() + rayDir.toBtVector3() * 1000.0f; // Scale ray length
 }
 
+void removeRigidBody(btRigidBody* hitObject) {
+	dynamicsWorld->removeRigidBody(hitObject);
+
+	if (btMotionState* motionState = hitObject->getMotionState()) {
+		delete motionState;
+	}
+
+	btCollisionShape* shape = hitObject->getCollisionShape();
+	if (shape) {
+		delete shape;
+	}
+
+	std::string* namePointer = static_cast<std::string*>(hitObject->getUserPointer());
+	if (namePointer) {
+		delete namePointer;
+	}
+
+	delete hitObject;
+}
+
 void processMouseEvents() {
 	if (mouseState[GLUT_LEFT_BUTTON] == true)
 	{
@@ -1296,7 +1332,8 @@ void processMouseEvents() {
 
 			if (rayCallback.hasHit())
 			{
-				const btRigidBody* hitObject = btRigidBody::upcast(rayCallback.m_collisionObject);
+				btRigidBody* hitObject = btRigidBody::upcast(const_cast<btCollisionObject*>(rayCallback.m_collisionObject));
+
 				btVector3 hitPoint = rayCallback.m_hitPointWorld;
 
 				const std::string* objectName = static_cast<const std::string*>(hitObject->getUserPointer());
@@ -1306,6 +1343,41 @@ void processMouseEvents() {
 					printf("Hit object: %s at (%f, %f, %f)\n",
 						objectName->c_str(),
 						hitPoint.x(), hitPoint.y(), hitPoint.z());
+					if (*objectName == "model_enemy_1"){
+						enemy1_health -= 0.1;
+						score++;
+						if (enemy1_health <= 0.0f) {
+							removeRigidBody(hitObject);
+						}
+					}
+					else if (*objectName == "model_enemy_2"){
+						enemy2_health -= 0.1;
+						score++;
+						if (enemy2_health <= 0.0f) {
+							removeRigidBody(hitObject);
+						}
+					}
+					else if (*objectName == "model_enemy_3"){
+						enemy3_health -= 0.1;
+						score++;
+						if (enemy3_health <= 0.0f) {
+							removeRigidBody(hitObject);
+						}
+					}
+					else if (*objectName == "model_enemy_4"){
+						enemy4_health -= 0.1;
+						score++;
+						if (enemy4_health <= 0.0f) {
+							removeRigidBody(hitObject);
+						}
+					}
+					else if (*objectName == "model_enemy_5"){
+						enemy5_health -= 0.1;
+						score++;
+						if (enemy5_health <= 0.0f) {
+							removeRigidBody(hitObject);
+						}
+					}
 				}
 				else
 				{
