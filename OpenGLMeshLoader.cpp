@@ -84,6 +84,7 @@ Vector Eye(0, 15, 0);
 Vector At(0, 5, 0);
 Vector Up(0, 1, 0);
 int cameraZoom = 0;
+int score = 0;
 
 Model_3DS model_player;
 Model_3DS model_crate1;
@@ -441,6 +442,7 @@ void cleanupPhysicsWorld() {
 
 void updatePhysics(float deltaTime) {
 	if (!dynamicsWorld) return;
+	if (currentDisplayMode == MAIN_MENU) return;
 	dynamicsWorld->stepSimulation(deltaTime, 10);
 }
 
@@ -703,6 +705,29 @@ void DrawCrosshair(int screenWidth, int screenHeight) {
 	glEnable(GL_DEPTH_TEST);
 }
 
+void displayScore() {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(-2.0, 2.0, -1.0, 1.0); // Set up an orthographic projection
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glRasterPos2f(-1.9, 0.9); // Set the position of the text
+
+	std::string s = "Score: " + std::to_string(score);
+	for (int i = 0; i < s.length(); i++) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[i]);
+	}
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
 void drawPlayer() {
 	// Update player position and rotation from physics simulation
 	if (playerRigidBody) {
@@ -797,14 +822,14 @@ void drawPlayer() {
 	}
 }
 
-void displayText(float x, float y, int r, int g, int b, const char* string) {
+void displayText(float x, float y, int r, int g, int b, const char* string, void* font) {
 	int j = strlen(string);
 
 	glDisable(GL_DEPTH_TEST);
 	glColor3f(r, g, b);
 	glRasterPos2f(x, y);
 	for (int i = 0; i < j; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+		glutBitmapCharacter(font, string[i]);
 	}
 	glEnable(GL_DEPTH_TEST);
 	glColor3f(1, 1, 1);
@@ -812,7 +837,7 @@ void displayText(float x, float y, int r, int g, int b, const char* string) {
 
 void drawButton(float x, float y, float width, float height, const char* text, void (*callback)()) {
     // Draw button background
-    glColor3f(0.7f, 0.7f, 0.7f); // Light gray color for button
+    glColor3f(1.0f, 0.85f, 0.58f); // Light gray color for button
     glBegin(GL_QUADS);
     glVertex2f(x - width/2, y - height/2);      // Bottom left
     glVertex2f(x + width/2, y - height/2);      // Bottom right
@@ -834,7 +859,6 @@ void drawButton(float x, float y, float width, float height, const char* text, v
 
 	glDisable(GL_DEPTH_TEST);
     // Draw button text
-    glColor3f(0.0f, 0.0f, 0.0f); // Black text
     float textX = x - (glutBitmapLength(GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)text) / 2.0f);
     float textY = y - 10; // Adjust vertical position to center text
     glRasterPos2f(textX, textY);
@@ -843,14 +867,13 @@ void drawButton(float x, float y, float width, float height, const char* text, v
     for (int i = 0; text[i] != '\0'; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
     }
-	glColor3f(1, 1, 1);
 	glEnable(GL_DEPTH_TEST);
 }
 
 void drawMainMenu() {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-	glClearColor(0.5, 0.5, 0.5, 1.0);
+	glClearColor(0.89, 0.83, 0.67, 1.0);
 	glLoadIdentity();
 	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT);
 
@@ -858,15 +881,16 @@ void drawMainMenu() {
 	glPushMatrix();
 	glLoadIdentity();
 
-	displayText(-100, 150, 1, 1, 1, "Pick a game mode");
+	displayText(-60, 150, 1, 1, 1, "GUC Strike", GLUT_BITMAP_TIMES_ROMAN_24);
+	displayText(-90, 50, 1, 1, 1, "Pick a game mode", GLUT_BITMAP_TIMES_ROMAN_24);
 
 	// button for map 1
-	drawButton(0, 70, 200, 50, "Map 1", []() {
+	drawButton(-150, -50, 200, 50, "Train", []() {
 		currentDisplayMode = MAP_1;
 	});
 
 	// button for map 2
-	drawButton(0, -70, 200, 50, "Map 2", []() {
+	drawButton(150, -50, 200, 50, "Play", []() {
 		currentDisplayMode = MAP_2;
 	});
 
@@ -890,6 +914,7 @@ void myDisplay(void)
 		return;
 	}
 	else if(currentDisplayMode == MAP_1) {
+		displayScore();
 		// Draw Player Model
 		glPushMatrix();
 		drawPlayer();
@@ -922,7 +947,7 @@ void myDisplay(void)
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
-	
+		displayScore();
 		// Draw Player Model
 		drawPlayer();
 
@@ -988,6 +1013,14 @@ void myKeyboard(unsigned char button, int x, int y)
 		else {
 			currentMode = FIRST_PERSON;
 		}
+	}
+	else if (button == 'm') {
+		mouseEnabled = false;
+		glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+		if (currentDisplayMode != MAIN_MENU) {
+			cleanupPhysicsWorld();
+		}
+		currentDisplayMode = MAIN_MENU;
 	}
 	glutPostRedisplay();
 	//if (!playerRigidBody) return;
@@ -1198,49 +1231,53 @@ void processMouseEvents() {
 		float glX = (mouseEventX - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
 		float glY = (HEIGHT / 2.0f - mouseEventY) * (HEIGHT / (float)HEIGHT);
 
-		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
+		if (glX >= -250 && glX <= -50 && glY >= -75 && glY <= -25) {
 			currentDisplayMode = MAP_1;
 			initPhysicsWorld(1);
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
+			score = 0;
 		}
-		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
+		if (glX >= 50 && glX <= 250 && glY >= -75 && glY <= -25) {
 			currentDisplayMode = MAP_2;
 			initPhysicsWorld(2);
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
+			score = 0;
 		}
 
-		// Calculate camera orientation
-		Vector forward = (At - Eye).normalize();
-		Vector right = forward.cross(Up).normalize();
-		Vector up = right.cross(forward);
+		if (currentDisplayMode != MAIN_MENU) {
+			// Calculate camera orientation
+			Vector forward = (At - Eye).normalize();
+			Vector right = forward.cross(Up).normalize();
+			Vector up = right.cross(forward);
 
-		// Compute ray
-		btVector3 rayFrom = Eye.toBtVector3();
-		btVector3 rayTo = calculateRayTo(mouseEventX, mouseEventY, WIDTH, HEIGHT, Eye, forward, right, up);
+			// Compute ray
+			btVector3 rayFrom = Eye.toBtVector3();
+			btVector3 rayTo = calculateRayTo(mouseEventX, mouseEventY, WIDTH, HEIGHT, Eye, forward, right, up);
 
-		// Perform raycast
-		btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
-		dynamicsWorld->rayTest(rayFrom, rayTo, rayCallback);
+			// Perform raycast
+			btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+			dynamicsWorld->rayTest(rayFrom, rayTo, rayCallback);
 
-		if (rayCallback.hasHit())
-		{
-			const btRigidBody* hitObject = btRigidBody::upcast(rayCallback.m_collisionObject);
-			btVector3 hitPoint = rayCallback.m_hitPointWorld;
-
-			const std::string* objectName = static_cast<const std::string*>(hitObject->getUserPointer());
-
-			if (objectName)
+			if (rayCallback.hasHit())
 			{
-				printf("Hit object: %s at (%f, %f, %f)\n",
-					objectName->c_str(),
-					hitPoint.x(), hitPoint.y(), hitPoint.z());
-			}
-			else
-			{
-				printf("Hit object at: (%f, %f, %f)\n",
-					hitPoint.x(), hitPoint.y(), hitPoint.z());
+				const btRigidBody* hitObject = btRigidBody::upcast(rayCallback.m_collisionObject);
+				btVector3 hitPoint = rayCallback.m_hitPointWorld;
+
+				const std::string* objectName = static_cast<const std::string*>(hitObject->getUserPointer());
+
+				if (objectName)
+				{
+					printf("Hit object: %s at (%f, %f, %f)\n",
+						objectName->c_str(),
+						hitPoint.x(), hitPoint.y(), hitPoint.z());
+				}
+				else
+				{
+					printf("Hit object at: (%f, %f, %f)\n",
+						hitPoint.x(), hitPoint.y(), hitPoint.z());
+				}
 			}
 		}
 	}
