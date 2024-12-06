@@ -103,6 +103,7 @@ Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
 Model_3DS model_muzzle;
+Model_3DS model_skybox;
 GLTexture tex_ground;
 
 enum mode {
@@ -448,6 +449,7 @@ void LoadAssets()
 {
 	model_player.Load("Models/Scene2/Player/player2.3ds");
 	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
+	model_skybox.Load("Models/Scene1/SkyBoxMap/skybox.3ds");
 
 	//// Loading Map2 files
 	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
@@ -901,15 +903,7 @@ void myDisplay(void)
 		//sky box
 		glPushMatrix();
 
-		GLUquadricObj* qobj;
-		qobj = gluNewQuadric();
-		glTranslated(50, 0, 0);
-		glRotated(90, 1, 0, 1);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		gluQuadricTexture(qobj, true);
-		gluQuadricNormals(qobj, GL_SMOOTH);
-		gluSphere(qobj, 200, 100, 100);
-		gluDeleteQuadric(qobj);
+		model_skybox.Draw();
 
 		glPopMatrix();
 
@@ -941,15 +935,8 @@ void myDisplay(void)
 		//sky box
 		glPushMatrix();
 
-		GLUquadricObj* qobj;
-		qobj = gluNewQuadric();
-		glTranslated(50, 0, 0);
-		glRotated(90, 1, 0, 1);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		gluQuadricTexture(qobj, true);
-		gluQuadricNormals(qobj, GL_SMOOTH);
-		gluSphere(qobj, 200, 100, 100);
-		gluDeleteQuadric(qobj);
+		glScalef(150, 150, 150);
+		model_skybox.Draw();
 
 		glPopMatrix();
 
