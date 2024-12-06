@@ -885,6 +885,7 @@ void drawButton(float x, float y, float width, float height, const char* text, v
 }
 
 void drawMainMenu() {
+	glClearColor(1, 1, 1, 1.0);
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glClearColor(0.89, 0.83, 0.67, 1.0);
@@ -1496,7 +1497,7 @@ void onUpdate(int value) {
 	enemy2_hit--;
 	enemy3_hit--;
 	enemy4_hit--;
-	enemy4_hit--;
+	enemy5_hit--;
 
     // Set up the next timer event
     glutTimerFunc(7, onUpdate, 0);  // ~144 FPS
