@@ -874,6 +874,9 @@ void myDisplay(void)
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
+	
+		// Draw Player Model
+		drawPlayer();
 
 		//// Draw Enemy Model
 		//glPushMatrix();
