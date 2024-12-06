@@ -105,6 +105,7 @@ Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
 Model_3DS model_muzzle;
+Model_3DS model_skybox;
 GLTexture tex_ground;
 
 enum mode {
@@ -357,15 +358,15 @@ void initPhysicsWorld(int map) {
 		mapRigidBody = new btRigidBody(rigidBodyCI);
 		dynamicsWorld->addRigidBody(mapRigidBody);
 
-		addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075), "model_bench1"); // model_bench1
-		addStaticBody(model_boxes, btVector3(5, 1.5, 5), btVector3(0.1, 0.1, 0.1), "model_boxes"); // model_boxes
+		//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075), "model_bench1"); // model_bench1
+		//addStaticBody(model_boxes, btVector3(5, 1.5, 5), btVector3(0.1, 0.1, 0.1), "model_boxes"); // model_boxes
 		//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1), "model_munitions"); // model_munitions
-		addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
-		addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
+		//addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
+		//addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
 		addStaticBodyTriangleMesh(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_1"); // model_target_1
 		addStaticBodyTriangleMesh(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_2"); // model_target_2
 		addStaticBodyTriangleMesh(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_3"); // model_target_3
-		addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
+		//addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
 
 		playerPhysics();
 
@@ -451,24 +452,25 @@ void LoadAssets()
 {
 	model_player.Load("Models/Scene2/Player/player2.3ds");
 	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
+	model_skybox.Load("Models/Scene1/SkyBoxMap/skybox.3ds");
 
 	//// Loading Map2 files
 	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
 	model_crate1.Load("Models/Scene2/crate1/crate.3ds");
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
-	model_map2.Load("Models/Scene2/Map/map5.3ds");
+	model_map2.Load("Models/Scene2/Map/map6.3ds");
 
 	//// Loading Map1 files
-	model_map1.Load("Models/Scene1/Map/map2.3ds");
-	model_bench1.Load("Models/Scene1/Bench/bench.3ds");
-	model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
+	model_map1.Load("Models/Scene1/Map/map3.3ds");
+	//model_bench1.Load("Models/Scene1/Bench/bench.3ds");
+	//model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
 	model_weapon.Load("Models/Scene1/Weapon/weapon.3ds");
-	model_munitions.Load("Models/Scene1/Munitions/munitions.3ds");
-	model_planks.Load("Models/Scene1/Planks/plank.3ds");
-	model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
+	//model_munitions.Load("Models/Scene1/Munitions/munitions.3ds");
+	//model_planks.Load("Models/Scene1/Planks/plank.3ds");
+	//model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
 	model_target.Load("Models/Scene1/Target/target.3ds");
-	model_chair.Load("Models/Scene1/Chair/chair.3ds");
+	//model_chair.Load("Models/Scene1/Chair/chair.3ds");
 
 	models.push_back(model_player);
 	models.push_back(model_crate1);
@@ -593,43 +595,6 @@ void renderMap1() {
 	model_map1.Draw();
 	glPopMatrix();
 
-	// Draw Bench Model
-	glPushMatrix();
-	glTranslatef(0, 3, 15);
-	glRotatef(90, 0, 1, 0);
-	glScalef(0.075, 0.075, 0.075);
-	model_bench1.Draw();
-	glPopMatrix();
-
-	// Draw Boxes Model
-	glPushMatrix();
-	glTranslatef(5, 1.5, 5);
-	glScalef(0.1, 0.1, 0.1);
-	model_boxes.Draw();
-	glPopMatrix();
-
-	// Draw Munitions Model
-	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
-	model_munitions.Draw();
-	glPopMatrix();
-
-	// Draw Planks Model
-	glPushMatrix();
-	glTranslatef(0, 0, -5);
-	glRotatef(-90, 1, 0, 0);
-	glScalef(0.5, 0.5, 0.5);
-	model_planks.Draw();
-	glPopMatrix();
-
-	// Draw Supplies Model
-	glPushMatrix();
-	glTranslatef(-5, 0, 5);
-	glRotatef(90, 0, 1, 0);
-	glScalef(0.1, 0.1, 0.1);
-	model_supplies.Draw();
-	glPopMatrix();
-
 	// Draw Target Model
 	glPushMatrix();
 	glTranslatef(0, 0, -10);
@@ -650,16 +615,6 @@ void renderMap1() {
 	glScalef(0.025, 0.025, 0.025);
 	model_target.Draw();
 	glPopMatrix();
-
-	// Draw Chair Model
-	glPushMatrix();
-	glTranslatef(5, 2, 15);
-	glRotatef(45, 0, 1, 0);
-	glScalef(0.025, 0.025, 0.025);
-	model_chair.Draw();
-	glPopMatrix();
-
-
 }
 
 void DrawCrosshair(int screenWidth, int screenHeight) {
@@ -921,21 +876,47 @@ void myDisplay(void)
 		drawPlayer();
 		glPopMatrix();
 
+		glEnable(GL_LIGHT1); // Sunlight
+		glEnable(GL_LIGHT2); // Moonlight
+
+		// Calculate skybox rotation
+		float rotationAngle = oldTime / 1000.0f;
+
+		// Configure sunlight (GL_LIGHT1)
+		GLfloat sunPosition[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+		GLfloat sunDiffuse[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+		GLfloat sunSpecular[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT1, GL_POSITION, sunPosition);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, sunDiffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, sunSpecular);
+		glPopMatrix();
+
+		// Configure moonlight (GL_LIGHT2)
+		GLfloat moonPosition[] = { 0.0f, -1.0f, 0.0f, 1.0f };
+		GLfloat moonDiffuse[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+		GLfloat moonSpecular[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT2, GL_POSITION, moonPosition);
+		glLightfv(GL_LIGHT2, GL_DIFFUSE, moonDiffuse);
+		glLightfv(GL_LIGHT2, GL_SPECULAR, moonSpecular);
+		glPopMatrix();
+
 		// Draw Map Model
 		renderMap1();
 
 		//sky box
 		glPushMatrix();
 
-		GLUquadricObj* qobj;
-		qobj = gluNewQuadric();
-		glTranslated(50, 0, 0);
-		glRotated(90, 1, 0, 1);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		gluQuadricTexture(qobj, true);
-		gluQuadricNormals(qobj, GL_SMOOTH);
-		gluSphere(qobj, 200, 100, 100);
-		gluDeleteQuadric(qobj);
+		glScalef(150, 150, 150);
+
+		glRotatef(oldTime / 1000, 1, 0, 1);
+
+		model_skybox.Draw();
 
 		glPopMatrix();
 
@@ -944,13 +925,14 @@ void myDisplay(void)
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
 
-
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
 		displayScore();
 		// Draw Player Model
+		glPushMatrix();
 		drawPlayer();
+		glPopMatrix();
 
 		//// Draw Enemy Model
 		//glPushMatrix();
@@ -960,6 +942,36 @@ void myDisplay(void)
 		//model_enemy.Draw();
 		//glPopMatrix();
 
+		glEnable(GL_LIGHT1); // Sunlight
+		glEnable(GL_LIGHT2); // Moonlight
+
+		// Calculate skybox rotation
+		float rotationAngle = oldTime / 1000.0f;
+
+		// Configure sunlight (GL_LIGHT1)
+		GLfloat sunPosition[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+		GLfloat sunDiffuse[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+		GLfloat sunSpecular[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT1, GL_POSITION, sunPosition);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, sunDiffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, sunSpecular);
+		glPopMatrix();
+
+		// Configure moonlight (GL_LIGHT2)
+		GLfloat moonPosition[] = { 0.0f, -1.0f, 0.0f, 1.0f };
+		GLfloat moonDiffuse[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+		GLfloat moonSpecular[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT2, GL_POSITION, moonPosition);
+		glLightfv(GL_LIGHT2, GL_DIFFUSE, moonDiffuse);
+		glLightfv(GL_LIGHT2, GL_SPECULAR, moonSpecular);
+		glPopMatrix();
+
 
 		// Draw Map Model
 		renderMap2();
@@ -967,15 +979,10 @@ void myDisplay(void)
 		//sky box
 		glPushMatrix();
 
-		GLUquadricObj* qobj;
-		qobj = gluNewQuadric();
-		glTranslated(50, 0, 0);
-		glRotated(90, 1, 0, 1);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		gluQuadricTexture(qobj, true);
-		gluQuadricNormals(qobj, GL_SMOOTH);
-		gluSphere(qobj, 200, 100, 100);
-		gluDeleteQuadric(qobj);
+		glScalef(150, 150, 150);
+
+		glRotatef(rotationAngle, 1, 0, 1);
+		model_skybox.Draw();
 
 		glPopMatrix();
 
@@ -983,6 +990,7 @@ void myDisplay(void)
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
+
 		glutSwapBuffers();
 	}
 }
