@@ -456,7 +456,7 @@ void LoadAssets()
 	model_crate1.Load("Models/Scene2/crate1/crate.3ds");
 	model_enemy.Load("Models/Scene2/Enemy/enemy.3ds");
 	model_bench.Load("Models/Scene2/Bench/bench.3ds");
-	model_map2.Load("Models/Scene2/Map/map5.3ds");
+	model_map2.Load("Models/Scene2/Map/map6.3ds");
 
 	//// Loading Map1 files
 	model_map1.Load("Models/Scene1/Map/map3.3ds");
