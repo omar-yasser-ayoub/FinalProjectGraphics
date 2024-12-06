@@ -127,6 +127,12 @@ displayMode currentDisplayMode = MAIN_MENU;
 int mouseEventX = 0;
 int mouseEventY = 0;
 
+float bobbingFactor = 0.0f;
+float bobSpeed = 10.0f;
+float bobAmount = 0.05f;
+float swayAmount = 0.01f;
+float oldTime = 0.0f;
+
 float radians(float degrees) {
 	return degrees * 3.14159f / 180.0f;
 }
@@ -531,6 +537,8 @@ void myInit(void)
 
 	glEnable(GL_NORMALIZE);
 
+	oldTime = glutGet(GLUT_ELAPSED_TIME);
+
 	initMaterials();
 
 	LoadAssets();
@@ -694,10 +702,15 @@ void DrawCrosshair(int screenWidth, int screenHeight) {
 }
 
 void drawPlayer() {
-    // Update player position and rotation from physics simulation
-    if (playerRigidBody) {
-        btTransform trans;
-        playerRigidBody->getMotionState()->getWorldTransform(trans);
+	// Update player position and rotation from physics simulation
+	if (playerRigidBody) {
+		btTransform trans;
+		playerRigidBody->getMotionState()->getWorldTransform(trans);
+
+		// Get current time to calculate frame delta for smooth motion
+		float currentTime = glutGet(GLUT_ELAPSED_TIME);
+		float deltaTime = (currentTime - oldTime) / 1000.0f; // Time in seconds
+		oldTime = currentTime;
 
 		if (currentMode == THIRD_PERSON) {
 			glPushMatrix();
@@ -714,41 +727,56 @@ void drawPlayer() {
 
 			glPopMatrix();
 		}
+
 		if (currentMode == FIRST_PERSON) {
-
 			glPushMatrix();
-
 			glLoadIdentity();
-			
-			//disable depth testing
-			
 
-			float weaponOffsetX = 0.3f;
-			float weaponOffsetY = -0.4f;
-			float weaponOffsetZ = -0.5f;
+			// Apply weapon bobbing
+			if (keyState['w'] || keyState['a'] || keyState['s'] || keyState['d']) {
+				bobbingFactor += deltaTime * bobSpeed;
+				if (bobbingFactor > 2 * 3.141592653) {
+					bobbingFactor -= 2 * 3.141592653;
+				}
 
-			glTranslatef(weaponOffsetX, weaponOffsetY, weaponOffsetZ);
+				// Vertical bobbing (up and down movement)
+				float verticalBobbing = sin(bobbingFactor)/2 * bobAmount;
 
+				// Horizontal sway (left and right movement)
+				float horizontalSway = cos(bobbingFactor)/2 * swayAmount;
+
+				// Offset the weapon position based on bobbing
+				float weaponOffsetX = 0.3f + horizontalSway; // Apply horizontal sway to X
+				float weaponOffsetY = -0.4f + verticalBobbing; // Apply vertical bobbing to Y
+				float weaponOffsetZ = -0.5f;
+
+				// Apply weapon offset to the matrix
+				glTranslatef(weaponOffsetX, weaponOffsetY, weaponOffsetZ);
+			}
+			else {
+				// When the player is not moving, reset the bobbing offset
+				glTranslatef(0.3f, -0.4f, -0.5f);
+			}
 
 			glScalef(0.01f, 0.01f, 0.01f);
-			glRotatef(180, 0, 1, 0); 
+			glRotatef(180, 0, 1, 0); // Rotate weapon to face the camera
 
+			// Draw the weapon model
 			model_weapon.Draw();
 
-			
 			glPopMatrix();
 		}
 
-        // Update Eye position based on player rigid body
-        Eye.x = trans.getOrigin().x();
-        Eye.y = trans.getOrigin().y() + 3; // Adjust height as needed
-        Eye.z = trans.getOrigin().z();
+		// Update Eye position based on player rigid body
+		Eye.x = trans.getOrigin().x();
+		Eye.y = trans.getOrigin().y() + 3; // Adjust height as needed
+		Eye.z = trans.getOrigin().z();
 
-        // Update At position to maintain camera direction
-        At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
-        At.y = Eye.y + sin(radians(pitch));
-        At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
-    }
+		// Update At position to maintain camera direction
+		At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+		At.y = Eye.y + sin(radians(pitch));
+		At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+	}
 }
 
 void displayText(float x, float y, int r, int g, int b, const char* string) {
