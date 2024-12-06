@@ -126,6 +126,7 @@ enum displayMode {
 	MAIN_MENU,
 	MAP_1,
 	MAP_2,
+	WIN_SCREEN,
 };
 displayMode currentDisplayMode = MAIN_MENU;
 
@@ -461,7 +462,7 @@ void cleanupPhysicsWorld() {
 
 void updatePhysics(float deltaTime) {
 	if (!dynamicsWorld) return;
-	if (currentDisplayMode == MAIN_MENU) return;
+	if (currentDisplayMode == MAIN_MENU || currentDisplayMode == WIN_SCREEN) return;
 	dynamicsWorld->stepSimulation(deltaTime, 10);
 }
 
@@ -914,6 +915,26 @@ void drawMainMenu() {
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void displayWinScreen() {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glClearColor(0.56, 0.9, 0.56, 0.0f);
+	glLoadIdentity();
+	gluOrtho2D(-0.5 * WIDTH, 0.5 * WIDTH, -0.5 * HEIGHT, 0.5 * HEIGHT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	displayText(-60, 150, 1, 1, 1, "You Win :)", GLUT_BITMAP_TIMES_ROMAN_24);
+
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
 void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -923,8 +944,9 @@ void myDisplay(void)
 	// if current display mode is MAIN_MENU, show gray screen with text
 	if(currentDisplayMode == MAIN_MENU) {
 		drawMainMenu();
-		glutSwapBuffers();
-		return;
+	}
+	else if (currentDisplayMode == WIN_SCREEN) {
+		displayWinScreen();
 	}
 	else if(currentDisplayMode == MAP_1) {
 		displayScore();
@@ -981,8 +1003,6 @@ void myDisplay(void)
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
-
-		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
 		displayScore();
@@ -1058,9 +1078,9 @@ void myDisplay(void)
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
-
-		glutSwapBuffers();
 	}
+	
+	glutSwapBuffers();
 }
 
 void myKeyboard(unsigned char button, int x, int y)
@@ -1094,7 +1114,12 @@ void myKeyboard(unsigned char button, int x, int y)
 	else if (button == 'm') {
 		mouseEnabled = false;
 		glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-		if (currentDisplayMode != MAIN_MENU) {
+		enemy1_health = 5;
+		enemy2_health = 5;
+		enemy3_health = 5;
+		enemy4_health = 5;
+		enemy5_health = 5;
+		if (currentDisplayMode != MAIN_MENU && currentDisplayMode != WIN_SCREEN) {
 			cleanupPhysicsWorld();
 		}
 		currentDisplayMode = MAIN_MENU;
@@ -1341,7 +1366,7 @@ void processMouseEvents() {
 			score = 0;
 		}
 
-		if (currentDisplayMode != MAIN_MENU) {
+		if (currentDisplayMode != MAIN_MENU && currentDisplayMode != WIN_SCREEN) {
 			// Calculate camera orientation
 			Vector forward = (At - Eye).normalize();
 			Vector right = forward.cross(Up).normalize();
@@ -1407,6 +1432,17 @@ void processMouseEvents() {
 						if (enemy5_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
+					}
+					if (enemy1_health <= 0.0f && enemy2_health <= 0.0f && enemy3_health <= 0.0f && enemy4_health <= 0.0f && enemy5_health <= 0.0f) {
+						mouseEnabled = false;
+						glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+						enemy1_health = 5;
+						enemy2_health = 5;
+						enemy3_health = 5;
+						enemy4_health = 5;
+						enemy5_health = 5;
+						cleanupPhysicsWorld();
+						currentDisplayMode = WIN_SCREEN;
 					}
 				}
 				else
