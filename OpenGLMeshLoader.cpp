@@ -450,7 +450,7 @@ void updatePhysics(float deltaTime) {
 
 void LoadAssets()
 {
-	model_player.Load("Models/Scene2/Player/player3.3ds");
+	model_player.Load("Models/Scene2/Player/player4.3ds");
 	model_player.SwapFirstandSecondObjects();
 	model_player.numObjects = 1;
 
