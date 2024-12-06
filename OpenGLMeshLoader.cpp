@@ -356,15 +356,15 @@ void initPhysicsWorld(int map) {
 		mapRigidBody = new btRigidBody(rigidBodyCI);
 		dynamicsWorld->addRigidBody(mapRigidBody);
 
-		addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075), "model_bench1"); // model_bench1
-		addStaticBody(model_boxes, btVector3(5, 1.5, 5), btVector3(0.1, 0.1, 0.1), "model_boxes"); // model_boxes
+		//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075), "model_bench1"); // model_bench1
+		//addStaticBody(model_boxes, btVector3(5, 1.5, 5), btVector3(0.1, 0.1, 0.1), "model_boxes"); // model_boxes
 		//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1), "model_munitions"); // model_munitions
-		addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
-		addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
+		//addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
+		//addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
 		addStaticBodyTriangleMesh(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_1"); // model_target_1
 		addStaticBodyTriangleMesh(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_2"); // model_target_2
 		addStaticBodyTriangleMesh(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_3"); // model_target_3
-		addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
+		//addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
 
 		playerPhysics();
 
@@ -459,15 +459,15 @@ void LoadAssets()
 	model_map2.Load("Models/Scene2/Map/map5.3ds");
 
 	//// Loading Map1 files
-	model_map1.Load("Models/Scene1/Map/map2.3ds");
-	model_bench1.Load("Models/Scene1/Bench/bench.3ds");
-	model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
+	model_map1.Load("Models/Scene1/Map/map3.3ds");
+	//model_bench1.Load("Models/Scene1/Bench/bench.3ds");
+	//model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
 	model_weapon.Load("Models/Scene1/Weapon/weapon.3ds");
-	model_munitions.Load("Models/Scene1/Munitions/munitions.3ds");
-	model_planks.Load("Models/Scene1/Planks/plank.3ds");
-	model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
+	//model_munitions.Load("Models/Scene1/Munitions/munitions.3ds");
+	//model_planks.Load("Models/Scene1/Planks/plank.3ds");
+	//model_supplies.Load("Models/Scene1/Supplies/Supplies.3DS");
 	model_target.Load("Models/Scene1/Target/target.3ds");
-	model_chair.Load("Models/Scene1/Chair/chair.3ds");
+	//model_chair.Load("Models/Scene1/Chair/chair.3ds");
 
 	models.push_back(model_player);
 	models.push_back(model_crate1);
@@ -592,43 +592,6 @@ void renderMap1() {
 	model_map1.Draw();
 	glPopMatrix();
 
-	// Draw Bench Model
-	glPushMatrix();
-	glTranslatef(0, 3, 15);
-	glRotatef(90, 0, 1, 0);
-	glScalef(0.075, 0.075, 0.075);
-	model_bench1.Draw();
-	glPopMatrix();
-
-	// Draw Boxes Model
-	glPushMatrix();
-	glTranslatef(5, 1.5, 5);
-	glScalef(0.1, 0.1, 0.1);
-	model_boxes.Draw();
-	glPopMatrix();
-
-	// Draw Munitions Model
-	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
-	model_munitions.Draw();
-	glPopMatrix();
-
-	// Draw Planks Model
-	glPushMatrix();
-	glTranslatef(0, 0, -5);
-	glRotatef(-90, 1, 0, 0);
-	glScalef(0.5, 0.5, 0.5);
-	model_planks.Draw();
-	glPopMatrix();
-
-	// Draw Supplies Model
-	glPushMatrix();
-	glTranslatef(-5, 0, 5);
-	glRotatef(90, 0, 1, 0);
-	glScalef(0.1, 0.1, 0.1);
-	model_supplies.Draw();
-	glPopMatrix();
-
 	// Draw Target Model
 	glPushMatrix();
 	glTranslatef(0, 0, -10);
@@ -649,16 +612,6 @@ void renderMap1() {
 	glScalef(0.025, 0.025, 0.025);
 	model_target.Draw();
 	glPopMatrix();
-
-	// Draw Chair Model
-	glPushMatrix();
-	glTranslatef(5, 2, 15);
-	glRotatef(45, 0, 1, 0);
-	glScalef(0.025, 0.025, 0.025);
-	model_chair.Draw();
-	glPopMatrix();
-
-
 }
 
 void DrawCrosshair(int screenWidth, int screenHeight) {
