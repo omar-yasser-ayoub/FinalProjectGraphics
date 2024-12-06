@@ -451,7 +451,10 @@ void updatePhysics(float deltaTime) {
 
 void LoadAssets()
 {
-	model_player.Load("Models/Scene2/Player/player2.3ds");
+	model_player.Load("Models/Scene2/Player/player4.3ds");
+	model_player.SwapFirstandSecondObjects();
+	model_player.numObjects = 1;
+
 	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
 	model_skybox.Load("Models/Scene1/SkyBoxMap/skybox.3ds");
 
@@ -708,6 +711,15 @@ void drawPlayer() {
 
 			// Draw the player model
 			model_player.Draw();
+
+			glPushMatrix();
+			glRotatef(180, 1, 0, 0);
+			glTranslatef(0.0f, -1.0f, 1.0f);
+			glScalef(0.01f, 0.01f, 0.01f);
+			glRotatef(90, 1, 0, 0);
+			
+			model_weapon.Draw();
+			glPopMatrix();
 
 			glPopMatrix();
 		}

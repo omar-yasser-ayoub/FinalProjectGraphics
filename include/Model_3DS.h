@@ -167,6 +167,7 @@ public:
 	Model_3DS();			// Constructor
 	virtual ~Model_3DS();	// Destructor
 	btTriangleMesh* Model_3DS::CreateBulletTriangleMesh();
+	void Model_3DS::SwapFirstandSecondObjects();
 
 private:
 	void IntColorChunkProcessor(long length, long findex, int matindex);
