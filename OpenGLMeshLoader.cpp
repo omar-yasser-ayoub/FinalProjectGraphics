@@ -1158,7 +1158,8 @@ void onUpdate(int value) {
     // Update physics simulation
     updatePhysics(1.0f / 144.0f); // Assuming 144 FPS
 
-	checkBulletCollision(playerRigidBody, mapRigidBody);
+	//example collision check for testing
+	//checkBulletCollision(playerRigidBody, mapRigidBody);
 
     updateMovement();
 
