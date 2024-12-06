@@ -35,13 +35,49 @@ class Vector
 {
 public:
 	GLdouble x, y, z;
+
+	// Constructors
 	Vector() : x(0), y(0), z(0) {} // Initialize x, y, and z to 0
 	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-	void operator +=(float value)
+
+	// Operator overloading for addition
+	Vector operator+(const Vector& other) const
 	{
-		x += value;
-		y += value;
-		z += value;
+		return Vector(x + other.x, y + other.y, z + other.z);
+	}
+
+	// Operator overloading for scalar multiplication
+	Vector operator*(float scalar) const
+	{
+		return Vector(x * scalar, y * scalar, z * scalar);
+	}
+
+	Vector operator-(const Vector& other) const
+	{
+		return Vector(x - other.x, y - other.y, z - other.z);
+	}
+
+	Vector cross(const Vector& other) const
+	{
+		return Vector(
+			y * other.z - z * other.y,
+			z * other.x - x * other.z,
+			x * other.y - y * other.x
+		);
+	}
+
+	// Normalize the vector
+	Vector normalize() const
+	{
+		GLdouble length = sqrt(x * x + y * y + z * z);
+		if (length > 0)
+			return Vector(x / length, y / length, z / length);
+		return Vector();
+	}
+
+	btVector3 toBtVector3() const
+	{
+		return btVector3(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
 	}
 };
 Vector Eye(0, 15, 0);
@@ -129,7 +165,7 @@ void playerPhysics() {
 	dynamicsWorld->addRigidBody(playerRigidBody);
 }
 
-void addStaticBody(const Model_3DS& model, const btVector3& position, const btVector3& scale) {
+void addStaticBody(const Model_3DS& model, const btVector3& position, const btVector3& scale, const std::string& name) {
 	// Calculate half-extents from the model's bounding box
 	btVector3 halfExtents(
 		(model.maxX - model.minX) * scale.x() / 2.0f,
@@ -152,6 +188,10 @@ void addStaticBody(const Model_3DS& model, const btVector3& position, const btVe
 
 	// Create rigid body
 	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
+
+	// Set the user pointer to the name (allocate a new string for the pointer)
+	std::string* namePointer = new std::string(name);
+	rigidBody->setUserPointer(static_cast<void*>(namePointer));
 
 	// Add to dynamics world
 	dynamicsWorld->addRigidBody(rigidBody);
@@ -303,9 +343,9 @@ void initPhysicsWorld() {
 	mapRigidBody = new btRigidBody(rigidBodyCI);
 	dynamicsWorld->addRigidBody(mapRigidBody);
 
-	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5));   // model_crate1
-	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7));        // model_car
-	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01));// model_bench
+	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5), "model_crate1");   // model_crate1
+	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7), "model_car");        // model_car
+	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01), "model_bench");// model_bench
 	//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075)); // model_bench1
 	//addStaticBody(model_boxes, btVector3(5, 2, 5), btVector3(0.1, 0.1, 0.1));    // model_boxes
 	//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1));    // model_munitions
@@ -1000,8 +1040,26 @@ void myMouse(int button, int state, int x, int y) {
 	}
 }
 
+btVector3 calculateRayTo(int x, int y, int WIDTH, int HEIGHT, const Vector& Eye, const Vector& forward, const Vector& right, const Vector& up)
+{
+	float fov = 60.0f; // Field of view
+	float aspectRatio = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
+
+	// Normalize screen coordinates
+	float nx = (2.0f * x) / WIDTH - 1.0f;
+	float ny = 1.0f - (2.0f * y) / HEIGHT;
+
+	// Calculate ray direction in camera space
+	float tanFov = tan(3.141592653 * fov / 360.0f); // Convert FOV to radians
+	Vector rayDir = (forward + right * (nx * tanFov * aspectRatio) + up * (ny * tanFov)).normalize();
+
+	// Return the ray's destination in world space
+	return Eye.toBtVector3() + rayDir.toBtVector3() * 1000.0f; // Scale ray length
+}
+
 void processMouseEvents() {
-	if (mouseState[GLUT_LEFT_BUTTON] == true) {
+	if (mouseState[GLUT_LEFT_BUTTON] == true)
+	{
 		// Actual menu selection logic here
 		float glX = (mouseEventX - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
 		float glY = (HEIGHT / 2.0f - mouseEventY) * (HEIGHT / (float)HEIGHT);
@@ -1015,6 +1073,39 @@ void processMouseEvents() {
 			currentDisplayMode = MAP_2;
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
+		}
+
+		// Calculate camera orientation
+		Vector forward = (At - Eye).normalize();
+		Vector right = forward.cross(Up).normalize();
+		Vector up = right.cross(forward);
+
+		// Compute ray
+		btVector3 rayFrom = Eye.toBtVector3();
+		btVector3 rayTo = calculateRayTo(mouseEventX, mouseEventY, WIDTH, HEIGHT, Eye, forward, right, up);
+
+		// Perform raycast
+		btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+		dynamicsWorld->rayTest(rayFrom, rayTo, rayCallback);
+
+		if (rayCallback.hasHit())
+		{
+			const btRigidBody* hitObject = btRigidBody::upcast(rayCallback.m_collisionObject);
+			btVector3 hitPoint = rayCallback.m_hitPointWorld;
+
+			const std::string* objectName = static_cast<const std::string*>(hitObject->getUserPointer());
+
+			if (objectName)
+			{
+				printf("Hit object: %s at (%f, %f, %f)\n",
+					objectName->c_str(),
+					hitPoint.x(), hitPoint.y(), hitPoint.z());
+			}
+			else
+			{
+				printf("Hit object at: (%f, %f, %f)\n",
+					hitPoint.x(), hitPoint.y(), hitPoint.z());
+			}
 		}
 	}
 	if (mouseState[GLUT_RIGHT_BUTTON] == true) {
