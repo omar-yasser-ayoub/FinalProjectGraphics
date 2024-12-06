@@ -115,7 +115,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 int lastX = WIDTH / 2;
 int lastY = HEIGHT / 2;
-mode currentMode = FIRST_PERSON;
+mode currentMode = THIRD_PERSON;
 
 enum displayMode {
 	MAIN_MENU,
@@ -1035,6 +1035,40 @@ void updateMovement() {
 	playerRigidBody->setLinearVelocity(newVelocity);
 }
 
+void updateThirdPersonCamera()
+{
+	// Define the offset from the player's position
+	float distance = 5.0f;    // Distance behind the player
+	float height = 2.0f;      // Base height above the player
+
+	// Calculate the offset based on yaw (rotation)
+	Vector offset;
+	offset.x = -distance * cos(radians(yaw));  // Negative to move behind
+	offset.z = -distance * sin(radians(yaw));  // Negative to move behind
+
+	// Adjust height based on pitch, but limit the vertical range
+	float verticalOffset = height + sin(radians(pitch)) * 2.0f; // Scale the height by pitch
+	offset.y = verticalOffset;
+
+	// Ensure pitch is clamped to prevent over-rotation (for third-person)
+	if (pitch > 89.0f) pitch = 89.0f; // Limit upward pitch
+	if (pitch < -89.0f) pitch = -89.0f; // Limit downward pitch
+
+	// Set camera position (Eye) to player's position + offset
+	Vector cameraPosition = Eye + offset;
+
+	// The camera looks at the player's position (target)
+	Vector target = Eye;
+
+	// Update the view
+	glLoadIdentity();
+	gluLookAt(
+		cameraPosition.x, cameraPosition.y, cameraPosition.z, // Camera position
+		target.x, target.y, target.z,                        // Look at player
+		0.0f, 1.0f, 0.0f                                     // Up vector
+	);
+}
+
 void myMotion(int x, int y)
 {
 	if (!mouseEnabled) return;
@@ -1049,18 +1083,25 @@ void myMotion(int x, int y)
 	yaw += xoffset;
 	pitch += yoffset;
 
-	// Constrain pitch
-	if (pitch > 89.0f) pitch = 89.0f;
-	if (pitch < -89.0f) pitch = -89.0f;
 
-	// Calculate new camera direction
-	At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
-	At.y = Eye.y + sin(radians(pitch));
-	At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+	// First-person camera
+	if (currentMode == FIRST_PERSON)
+	{
+		if (pitch > 89.0f) pitch = 89.0f;
+		if (pitch < -89.0f) pitch = -89.0f;
 
-	// Update the view
-	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+		At.x = Eye.x + cos(radians(yaw)) * cos(radians(pitch));
+		At.y = Eye.y + sin(radians(pitch));
+		At.z = Eye.z + sin(radians(yaw)) * cos(radians(pitch));
+
+		glLoadIdentity();
+		gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	}
+	else // Third-person camera
+	{
+		updateThirdPersonCamera();
+	}
+
 	glutPostRedisplay();
 }
 
