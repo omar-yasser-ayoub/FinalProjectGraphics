@@ -411,6 +411,7 @@ void initPhysicsWorld(int map) {
 		addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5), "model_crate1"); // model_crate1
 		addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7), "model_car"); // model_car
 		addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01), "model_bench"); // model_bench
+		addStaticBodyTriangleMesh(model_enemy, btVector3(15, 0, 0), btVector3(0.5, 0.5, 0.5), "model_enemy_1");
 		playerPhysics();
 
 	}
@@ -778,6 +779,18 @@ void drawPlayer() {
 	}
 }
 
+void drawEnemy(float x, float y, float z) {
+	// Render the enemy
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	glScalef(0.5, 0.5, 0.5);
+
+	// Assuming you have a model for the enemy
+	model_enemy.Draw();
+
+	glPopMatrix();
+}
+
 void displayText(float x, float y, int r, int g, int b, const char* string, void* font) {
 	int j = strlen(string);
 
@@ -941,6 +954,8 @@ void myDisplay(void)
 		//glRotatef(-90, 0, 1, 0);
 		//model_enemy.Draw();
 		//glPopMatrix();
+
+		drawEnemy(15, 0, 0);
 
 		glEnable(GL_LIGHT1); // Sunlight
 		glEnable(GL_LIGHT2); // Moonlight
