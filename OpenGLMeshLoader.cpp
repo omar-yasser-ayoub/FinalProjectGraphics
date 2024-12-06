@@ -102,6 +102,7 @@ Model_3DS model_planks;
 Model_3DS model_supplies;
 Model_3DS model_target;
 Model_3DS model_chair;
+Model_3DS model_muzzle;
 GLTexture tex_ground;
 
 enum mode {
@@ -446,6 +447,7 @@ void updatePhysics(float deltaTime) {
 void LoadAssets()
 {
 	model_player.Load("Models/Scene2/Player/player2.3ds");
+	model_muzzle.Load("Models/Scene2/Muzzle/muzzle2.3ds");
 
 	//// Loading Map2 files
 	model_car.Load("Models/Scene2/BrokenCar/car.3ds");
@@ -740,10 +742,10 @@ void drawPlayer() {
 				}
 
 				// Vertical bobbing (up and down movement)
-				float verticalBobbing = sin(bobbingFactor)/2 * bobAmount;
+				float verticalBobbing = sin(bobbingFactor) / 2 * bobAmount;
 
 				// Horizontal sway (left and right movement)
-				float horizontalSway = cos(bobbingFactor)/2 * swayAmount;
+				float horizontalSway = cos(bobbingFactor) / 2 * swayAmount;
 
 				// Offset the weapon position based on bobbing
 				float weaponOffsetX = 0.3f + horizontalSway; // Apply horizontal sway to X
@@ -763,6 +765,22 @@ void drawPlayer() {
 
 			// Draw the weapon model
 			model_weapon.Draw();
+
+			// Draw the muzzle flash if the player is shooting
+			if (mouseState[GLUT_LEFT_BUTTON]) {  // Assuming `isShooting` is true when the player fires
+				glPushMatrix();
+				// Translate muzzle flash in front of the weapon
+				glTranslatef(2.0f, 10.0f, 50.0f); // Adjust this for proper position in front of the weapon
+
+				glScalef(4.0f, 4.0f, 4.0f);
+				// Draw a simple sphere (you can replace this with a model or particle system)
+				model_muzzle.Draw();
+
+				// Disable blending after drawing the muzzle flash
+				glDisable(GL_BLEND);
+
+				glPopMatrix();
+			}
 
 			glPopMatrix();
 		}
@@ -873,7 +891,9 @@ void myDisplay(void)
 	}
 	else if(currentDisplayMode == MAP_1) {
 		// Draw Player Model
+		glPushMatrix();
 		drawPlayer();
+		glPopMatrix();
 
 		// Draw Map Model
 		renderMap1();
