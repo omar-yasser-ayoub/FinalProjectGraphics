@@ -897,11 +897,45 @@ void myDisplay(void)
 		drawPlayer();
 		glPopMatrix();
 
+		glEnable(GL_LIGHT1); // Sunlight
+		glEnable(GL_LIGHT2); // Moonlight
+
+		// Calculate skybox rotation
+		float rotationAngle = oldTime / 1000.0f;
+
+		// Configure sunlight (GL_LIGHT1)
+		GLfloat sunPosition[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+		GLfloat sunDiffuse[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+		GLfloat sunSpecular[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT1, GL_POSITION, sunPosition);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, sunDiffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, sunSpecular);
+		glPopMatrix();
+
+		// Configure moonlight (GL_LIGHT2)
+		GLfloat moonPosition[] = { 0.0f, -1.0f, 0.0f, 1.0f };
+		GLfloat moonDiffuse[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+		GLfloat moonSpecular[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT2, GL_POSITION, moonPosition);
+		glLightfv(GL_LIGHT2, GL_DIFFUSE, moonDiffuse);
+		glLightfv(GL_LIGHT2, GL_SPECULAR, moonSpecular);
+		glPopMatrix();
+
 		// Draw Map Model
 		renderMap1();
 
 		//sky box
 		glPushMatrix();
+
+		glScalef(150, 150, 150);
+
+		glRotatef(oldTime / 1000, 1, 0, 1);
 
 		model_skybox.Draw();
 
@@ -912,13 +946,14 @@ void myDisplay(void)
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
 
-
 		glutSwapBuffers();
 	}
 	else if(currentDisplayMode == MAP_2) {
 	
 		// Draw Player Model
+		glPushMatrix();
 		drawPlayer();
+		glPopMatrix();
 
 		//// Draw Enemy Model
 		//glPushMatrix();
@@ -927,6 +962,36 @@ void myDisplay(void)
 		//glRotatef(-90, 0, 1, 0);
 		//model_enemy.Draw();
 		//glPopMatrix();
+
+		glEnable(GL_LIGHT1); // Sunlight
+		glEnable(GL_LIGHT2); // Moonlight
+
+		// Calculate skybox rotation
+		float rotationAngle = oldTime / 1000.0f;
+
+		// Configure sunlight (GL_LIGHT1)
+		GLfloat sunPosition[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+		GLfloat sunDiffuse[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+		GLfloat sunSpecular[] = { 1.0f, 0.8f, 0.5f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT1, GL_POSITION, sunPosition);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, sunDiffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, sunSpecular);
+		glPopMatrix();
+
+		// Configure moonlight (GL_LIGHT2)
+		GLfloat moonPosition[] = { 0.0f, -1.0f, 0.0f, 1.0f };
+		GLfloat moonDiffuse[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+		GLfloat moonSpecular[] = { 0.3f, 0.5f, 1.0f, 1.0f };
+
+		glPushMatrix();
+		glRotatef(rotationAngle, 1, 0, 1);
+		glLightfv(GL_LIGHT2, GL_POSITION, moonPosition);
+		glLightfv(GL_LIGHT2, GL_DIFFUSE, moonDiffuse);
+		glLightfv(GL_LIGHT2, GL_SPECULAR, moonSpecular);
+		glPopMatrix();
 
 
 		// Draw Map Model
@@ -937,7 +1002,7 @@ void myDisplay(void)
 
 		glScalef(150, 150, 150);
 
-		glRotatef(oldTime/1000, 1, 0, 1);
+		glRotatef(rotationAngle, 1, 0, 1);
 		model_skybox.Draw();
 
 		glPopMatrix();
@@ -946,6 +1011,7 @@ void myDisplay(void)
 
 		// Optional: Add physics debug drawing
 		dynamicsWorld->debugDrawWorld();
+
 		glutSwapBuffers();
 	}
 }
