@@ -1387,7 +1387,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_3"){
 						enemy3_health -= 0.1;
 						score++;
-						enemy2_hit = 10;
+						enemy3_hit = 10;
 						if (enemy3_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1395,7 +1395,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_4"){
 						enemy4_health -= 0.1;
 						score++;
-						enemy2_hit = 10;
+						enemy4_hit = 10;
 						if (enemy4_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
@@ -1403,7 +1403,7 @@ void processMouseEvents() {
 					else if (*objectName == "model_enemy_5"){
 						enemy5_health -= 0.1;
 						score++;
-						enemy2_hit = 10;
+						enemy5_hit = 10;
 						if (enemy5_health <= 0.0f) {
 							removeRigidBody(hitObject);
 						}
