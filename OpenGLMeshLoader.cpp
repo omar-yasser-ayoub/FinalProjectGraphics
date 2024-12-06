@@ -22,7 +22,7 @@ std::unordered_map<unsigned char, bool> keyState;
 std::unordered_map<int, bool> mouseState;
 std::vector<Model_3DS> models;
 btDiscreteDynamicsWorld* dynamicsWorld;
-btRigidBody* groundRigidBody;
+btRigidBody* mapRigidBody = nullptr;
 btDefaultCollisionConfiguration* collisionConfiguration;
 btCollisionDispatcher* dispatcher;
 btBroadphaseInterface* overlappingPairCache;
@@ -186,6 +186,64 @@ void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, cons
 	dynamicsWorld->addRigidBody(rigidBody);
 }
 
+class BulletCollisionCallback : public btCollisionWorld::ContactResultCallback {
+public:
+	btCollisionObject* bulletObject;
+	btCollisionObject* targetObject;
+	bool collisionDetected;
+
+	BulletCollisionCallback() : collisionDetected(false) {}
+
+	virtual btScalar addSingleResult(btManifoldPoint& cp,
+		const btCollisionObjectWrapper* colObj0, int partId0, int index0,
+		const btCollisionObjectWrapper* colObj1, int partId1, int index1) override {
+
+		// Check if the collision involves your bullet
+		if ((colObj0->getCollisionObject() == bulletObject &&
+			colObj1->getCollisionObject() == targetObject) ||
+			(colObj1->getCollisionObject() == bulletObject &&
+				colObj0->getCollisionObject() == targetObject)) {
+
+			collisionDetected = true;
+		}
+		return 0.0f;
+	}
+};
+
+void checkBulletCollision(btRigidBody* bullet, btRigidBody* enemy) {
+	if (!bullet) {
+		printf("BULLET IS NULL\n");
+		return;
+	}
+	if (!enemy) {
+		printf("ENEMY IS NULL\n");
+		return;
+	}
+	if (!dynamicsWorld) {
+		printf("DYNAMICS WORLD IS NULL\n");
+		return;
+	}
+
+	try {
+		BulletCollisionCallback callback;
+		callback.bulletObject = bullet;
+		callback.targetObject = enemy;
+
+		// Additional null check before contact test
+		if (bullet && enemy) {
+			dynamicsWorld->contactPairTest(bullet, enemy, callback);
+
+			if (callback.collisionDetected) {
+				printf("Collision detected\n");
+				// Handle collision logic safely
+			}
+		}
+	}
+	catch (std::exception& e) {
+		printf("Collision check error: %s\n", e.what());
+	}
+}
+
 void initPhysicsWorld() {
 	// Create the collision configuration
 	collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -242,8 +300,8 @@ void initPhysicsWorld() {
 		btVector3(0, 0, 0)        // No local inertia for static objects
 	);
 
-	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
-	dynamicsWorld->addRigidBody(rigidBody);
+	mapRigidBody = new btRigidBody(rigidBodyCI);
+	dynamicsWorld->addRigidBody(mapRigidBody);
 
 	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5));   // model_crate1
 	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7));        // model_car
@@ -271,11 +329,11 @@ void cleanupPhysicsWorld() {
 	}
 
 	// Remove ground body from dynamics world
-	dynamicsWorld->removeRigidBody(groundRigidBody);
+	dynamicsWorld->removeRigidBody(mapRigidBody);
 
 	// Delete physics objects
-	delete groundRigidBody->getMotionState();
-	delete groundRigidBody;
+	delete mapRigidBody->getMotionState();
+	delete mapRigidBody;
 
 	// Delete world and solver components
 	delete dynamicsWorld;
@@ -1008,6 +1066,8 @@ void onUpdate(int value) {
 
     // Update physics simulation
     updatePhysics(1.0f / 144.0f); // Assuming 144 FPS
+
+	checkBulletCollision(playerRigidBody, mapRigidBody);
 
     updateMovement();
 
