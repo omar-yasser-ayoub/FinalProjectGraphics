@@ -1128,20 +1128,10 @@ void updateMovement() {
 	playerRigidBody->setLinearVelocity(newVelocity);
 }
 
-float minimum(float a, float b) {
-	if (a < b) return a;
-	return b;
-}
-
-float maximum(float a, float b) {
-	if (a > b) return a;
-	return b;
-}
-
 void updateThirdPersonCamera() {
 	// Define the offset from the player's position
 	float distance = 5.0f;    // Distance behind the player
-	float height = 2.0f;      // Base height above the player
+	float height = 0.0f;      // Base height above the player
 
 	if (pitch > 89)
 		pitch = 89;
