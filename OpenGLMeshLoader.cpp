@@ -197,7 +197,7 @@ void addStaticBody(const Model_3DS& model, const btVector3& position, const btVe
 	dynamicsWorld->addRigidBody(rigidBody);
 }
 
-void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, const btVector3& scale) {
+void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, const btVector3& scale, const std::string& name) {
 	// Create triangle mesh
 	btTriangleMesh* triangleMesh = model.CreateBulletTriangleMesh();
 	if (!triangleMesh) {
@@ -221,6 +221,9 @@ void addStaticBodyTriangleMesh(Model_3DS& model, const btVector3& position, cons
 
 	// Create rigid body
 	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
+
+	std::string* namePointer = new std::string(name);
+	rigidBody->setUserPointer(static_cast<void*>(namePointer));
 
 	// Add to dynamics world
 	dynamicsWorld->addRigidBody(rigidBody);
@@ -350,9 +353,9 @@ void initPhysicsWorld(int map) {
 		//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1), "model_munitions"); // model_munitions
 		addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
 		addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
-		addStaticBody(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_1"); // model_target_1
-		addStaticBody(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_2"); // model_target_2
-		addStaticBody(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_3"); // model_target_3
+		addStaticBodyTriangleMesh(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_1"); // model_target_1
+		addStaticBodyTriangleMesh(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_2"); // model_target_2
+		addStaticBodyTriangleMesh(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_3"); // model_target_3
 		addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
 
 		playerPhysics();
