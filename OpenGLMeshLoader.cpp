@@ -711,6 +711,15 @@ void drawPlayer() {
 			// Draw the player model
 			model_player.Draw();
 
+			glPushMatrix();
+			glRotatef(180, 1, 0, 0);
+			glTranslatef(0.0f, -1.0f, 1.0f);
+			glScalef(0.01f, 0.01f, 0.01f);
+			glRotatef(90, 1, 0, 0);
+			
+			model_weapon.Draw();
+			glPopMatrix();
+
 			glPopMatrix();
 		}
 
