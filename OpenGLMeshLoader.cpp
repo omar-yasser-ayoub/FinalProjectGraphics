@@ -1446,6 +1446,10 @@ void processMouseEvents() {
 							removeRigidBody(hitObject);
 						}
 					}
+					else if(*objectName == "model_target_1" || *objectName == "model_target_2" || *objectName == "model_target_3") {
+						score++;
+					}
+
 					if (enemy1_health <= 0.0f && enemy2_health <= 0.0f && enemy3_health <= 0.0f && enemy4_health <= 0.0f && enemy5_health <= 0.0f) {
 						mouseEnabled = false;
 						glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
