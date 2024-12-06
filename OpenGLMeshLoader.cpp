@@ -936,6 +936,8 @@ void myDisplay(void)
 		glPushMatrix();
 
 		glScalef(150, 150, 150);
+
+		glRotatef(oldTime/1000, 1, 0, 1);
 		model_skybox.Draw();
 
 		glPopMatrix();
