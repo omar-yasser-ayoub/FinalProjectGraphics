@@ -938,6 +938,14 @@ void myKeyboard(unsigned char button, int x, int y)
 		glutReshapeWindow(800, 600);
 		glutPositionWindow(100, 100);
 	}
+	else if (button == 'e') {
+		if (currentMode == FIRST_PERSON) {
+			currentMode = THIRD_PERSON;
+		}
+		else {
+			currentMode = FIRST_PERSON;
+		}
+	}
 	glutPostRedisplay();
 	//if (!playerRigidBody) return;
 
@@ -1047,7 +1055,7 @@ void updateThirdPersonCamera()
 	offset.z = -distance * sin(radians(yaw));  // Negative to move behind
 
 	// Adjust height based on pitch, but limit the vertical range
-	float verticalOffset = height + sin(radians(pitch)) * 2.0f; // Scale the height by pitch
+	float verticalOffset = height + sin(radians(-pitch)) * 2.0f; // Scale the height by pitch
 	offset.y = verticalOffset;
 
 	// Ensure pitch is clamped to prevent over-rotation (for third-person)
@@ -1191,22 +1199,6 @@ void processMouseEvents() {
 				printf("Hit object at: (%f, %f, %f)\n",
 					hitPoint.x(), hitPoint.y(), hitPoint.z());
 			}
-		}
-	}
-	if (mouseState[GLUT_RIGHT_BUTTON] == true) {
-		// Actual menu selection logic here
-		float glX = (mouseEventX - WIDTH / 2.0f) * (WIDTH / (float)WIDTH);
-		float glY = (HEIGHT / 2.0f - mouseEventY) * (HEIGHT / (float)HEIGHT);
-
-		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
-			currentDisplayMode = MAP_2;
-			mouseEnabled = true;
-			glutSetCursor(GLUT_CURSOR_NONE);
-		}
-		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
-			currentDisplayMode = MAP_1;
-			mouseEnabled = true;
-			glutSetCursor(GLUT_CURSOR_NONE);
 		}
 	}
 }
