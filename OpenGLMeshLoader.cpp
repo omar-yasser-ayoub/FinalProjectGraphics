@@ -284,7 +284,7 @@ void checkBulletCollision(btRigidBody* bullet, btRigidBody* enemy) {
 	}
 }
 
-void initPhysicsWorld() {
+void initPhysicsWorld(int map) {
 	// Create the collision configuration
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 
@@ -308,55 +308,101 @@ void initPhysicsWorld() {
 	// Set gravity (default is -9.8 m/s^2 on Y-axis)
 	dynamicsWorld->setGravity(btVector3(0, -9.8f * 6, 0));
 
-	// Create ground plane
-	mapTriangleMeshShape = model_map2.CreateBulletTriangleMesh();
-	if (!mapTriangleMeshShape) {
-		printf("Failed to create map triangle mesh shape\n");
-		return;
+	if (map == 1) {
+
+		// Create ground plane
+		mapTriangleMeshShape = model_map1.CreateBulletTriangleMesh();
+		if (!mapTriangleMeshShape) {
+			printf("Failed to create map triangle mesh shape\n");
+			return;
+		}
+
+		mapCollisionShape = new btBvhTriangleMeshShape(mapTriangleMeshShape, true);
+		if (!mapCollisionShape) {
+			printf("Failed to create map collision shape\n");
+			return;
+		}
+
+		// Create collision shape with scaling
+		btVector3 meshScale(3.0f, 3.0f, 3.0f);
+		scaledMeshShape = new btScaledBvhTriangleMeshShape(mapCollisionShape, meshScale);
+
+		// Set up the rigid body with translation
+		btDefaultMotionState* motionState = new btDefaultMotionState(
+			btTransform(
+				btQuaternion(0, 0, 0, 1),
+				btVector3(0, -1, 0)  // Translation vector
+			)
+		);
+
+		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(
+			0,                        // Mass = 0 for static objects
+			motionState,
+			scaledMeshShape,
+			btVector3(0, 0, 0)        // No local inertia for static objects
+		);
+
+		mapRigidBody = new btRigidBody(rigidBodyCI);
+		dynamicsWorld->addRigidBody(mapRigidBody);
+
+		addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075), "model_bench1"); // model_bench1
+		addStaticBody(model_boxes, btVector3(5, 1.5, 5), btVector3(0.1, 0.1, 0.1), "model_boxes"); // model_boxes
+		//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1), "model_munitions"); // model_munitions
+		addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5), "model_planks"); // model_planks
+		addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1), "model_supplies"); // model_supplies
+		addStaticBody(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_1"); // model_target_1
+		addStaticBody(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_2"); // model_target_2
+		addStaticBody(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025), "model_target_3"); // model_target_3
+		addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025), "model_chair"); // model_chair
+
+		playerPhysics();
+
+	}
+	else if (map == 2) {
+
+		// Create ground plane
+		mapTriangleMeshShape = model_map2.CreateBulletTriangleMesh();
+		if (!mapTriangleMeshShape) {
+			printf("Failed to create map triangle mesh shape\n");
+			return;
+		}
+
+		mapCollisionShape = new btBvhTriangleMeshShape(mapTriangleMeshShape, true);
+		if (!mapCollisionShape) {
+			printf("Failed to create map collision shape\n");
+			return;
+		}
+
+		// Create collision shape with scaling
+		btVector3 meshScale(3.0f, 3.0f, 3.0f);
+		scaledMeshShape = new btScaledBvhTriangleMeshShape(mapCollisionShape, meshScale);
+
+		// Set up the rigid body with translation
+		btDefaultMotionState* motionState = new btDefaultMotionState(
+			btTransform(
+				btQuaternion(0, 0, 0, 1),
+				btVector3(5, -1, 5)  // Translation vector
+			)
+		);
+
+		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(
+			0,                        // Mass = 0 for static objects
+			motionState,
+			scaledMeshShape,
+			btVector3(0, 0, 0)        // No local inertia for static objects
+		);
+
+		mapRigidBody = new btRigidBody(rigidBodyCI);
+		dynamicsWorld->addRigidBody(mapRigidBody);
+
+		addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5), "model_crate1"); // model_crate1
+		addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7), "model_car"); // model_car
+		addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01), "model_bench"); // model_bench
+		playerPhysics();
+
 	}
 
-	mapCollisionShape = new btBvhTriangleMeshShape(mapTriangleMeshShape, true);
-	if (!mapCollisionShape) {
-		printf("Failed to create map collision shape\n");
-		return;
-	}
-
-	// Create collision shape with scaling
-	btVector3 meshScale(3.0f, 3.0f, 3.0f);
-	scaledMeshShape = new btScaledBvhTriangleMeshShape(mapCollisionShape, meshScale);
-
-	// Set up the rigid body with translation
-	btDefaultMotionState* motionState = new btDefaultMotionState(
-		btTransform(
-			btQuaternion(0, 0, 0, 1),
-			btVector3(5, -1, 5)  // Translation vector
-		)
-	);
-
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(
-		0,                        // Mass = 0 for static objects
-		motionState,
-		scaledMeshShape,
-		btVector3(0, 0, 0)        // No local inertia for static objects
-	);
-
-	mapRigidBody = new btRigidBody(rigidBodyCI);
-	dynamicsWorld->addRigidBody(mapRigidBody);
-
-	addStaticBody(model_crate1, btVector3(25, 0, 0), btVector3(0.5, 0.5, 0.5), "model_crate1");   // model_crate1
-	addStaticBody(model_car, btVector3(-3, 0, -5), btVector3(7, 7, 7), "model_car");        // model_car
-	addStaticBody(model_bench, btVector3(8, 0, 17), btVector3(0.01, 0.01, 0.01), "model_bench");// model_bench
-	//addStaticBody(model_bench1, btVector3(0, 3, 15), btVector3(0.075, 0.075, 0.075)); // model_bench1
-	//addStaticBody(model_boxes, btVector3(5, 2, 5), btVector3(0.1, 0.1, 0.1));    // model_boxes
-	//addStaticBody(model_munitions, btVector3(0, 0, 0), btVector3(0.1, 0.1, 0.1));    // model_munitions
-	//addStaticBody(model_planks, btVector3(0, 0, -5), btVector3(0.5, 0.5, 0.5));   // model_planks
-	//addStaticBody(model_supplies, btVector3(-5, 0, 5), btVector3(0.1, 0.1, 0.1));   // model_supplies
-	//addStaticBody(model_target, btVector3(0, 0, -10), btVector3(0.025, 0.025, 0.025)); // model_target
-	//addStaticBody(model_target, btVector3(-5, 0, -10), btVector3(0.025, 0.025, 0.025)); // model_target
-	//addStaticBody(model_target, btVector3(5, 0, -10), btVector3(0.025, 0.025, 0.025));  // model_target
-	//addStaticBody(model_chair, btVector3(5, 2, 15), btVector3(0.025, 0.025, 0.025));   // model_chair
-
-	playerPhysics();
+	
 }
 
 void cleanupPhysicsWorld() {
@@ -384,6 +430,7 @@ void cleanupPhysicsWorld() {
 }
 
 void updatePhysics(float deltaTime) {
+	if (!dynamicsWorld) return;
 	dynamicsWorld->stepSimulation(deltaTime, 10);
 }
 
@@ -399,7 +446,7 @@ void LoadAssets()
 	model_map2.Load("Models/Scene2/Map/map5.3ds");
 
 	//// Loading Map1 files
-	model_map1.Load("Models/Scene1/Map/map.3ds");
+	model_map1.Load("Models/Scene1/Map/map2.3ds");
 	model_bench1.Load("Models/Scene1/Bench/bench.3ds");
 	model_boxes.Load("Models/Scene1/Boxes/boxes.3ds");
 	model_weapon.Load("Models/Scene1/Weapon/weapon.3ds");
@@ -484,8 +531,6 @@ void myInit(void)
 	initMaterials();
 
 	LoadAssets();
-
-	initPhysicsWorld(); // Initialize Bullet Physics
 }
 
 void renderMap2() {
@@ -542,15 +587,9 @@ void renderMap1() {
 
 	// Draw Boxes Model
 	glPushMatrix();
-	glTranslatef(5, 2, 5);
+	glTranslatef(5, 1.5, 5);
 	glScalef(0.1, 0.1, 0.1);
 	model_boxes.Draw();
-	glPopMatrix();
-
-	// Draw Weapon Model
-	glPushMatrix();
-	glScalef(0.1, 0.1, 0.1);
-	model_weapon.Draw();
 	glPopMatrix();
 
 	// Draw Munitions Model
@@ -1066,11 +1105,13 @@ void processMouseEvents() {
 
 		if (glX >= -100 && glX <= 100 && glY >= 45 && glY <= 95) {
 			currentDisplayMode = MAP_1;
+			initPhysicsWorld(1);
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
 		}
 		if (glX >= -100 && glX <= 100 && glY >= -95 && glY <= -45) {
 			currentDisplayMode = MAP_2;
+			initPhysicsWorld(2);
 			mouseEnabled = true;
 			glutSetCursor(GLUT_CURSOR_NONE);
 		}

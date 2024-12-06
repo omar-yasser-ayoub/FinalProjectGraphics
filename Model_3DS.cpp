@@ -345,6 +345,15 @@ void Model_3DS::Load(char *name)
 			// Set the number of texture coords
 			Objects[k].numTexCoords = Objects[k].numVerts;
 
+			const size_t MAX_ALLOWED_TEXCOORDS = (1 * 1024 * 1024 * 1024) / (2 * 4); // 134,217,728
+
+			if (Objects[k].numTexCoords > MAX_ALLOWED_TEXCOORDS)
+			{
+				// Handle the error, e.g., log it and skip this object
+				continue;
+			}
+
+
 			// Allocate an array to hold the texture coordinates
 			Objects[k].TexCoords = new GLfloat[Objects[k].numTexCoords * 2];
 
