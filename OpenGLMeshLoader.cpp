@@ -1,3 +1,4 @@
+using namespace std;
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
 #include "GLTexture.h"
@@ -1119,37 +1120,45 @@ void updateMovement() {
 	playerRigidBody->setLinearVelocity(newVelocity);
 }
 
-void updateThirdPersonCamera()
-{
+float minimum(float a, float b) {
+	if (a < b) return a;
+	return b;
+}
+
+float maximum(float a, float b) {
+	if (a > b) return a;
+	return b;
+}
+
+void updateThirdPersonCamera() {
 	// Define the offset from the player's position
 	float distance = 5.0f;    // Distance behind the player
 	float height = 2.0f;      // Base height above the player
 
-	// Calculate the offset based on yaw (rotation)
+	if (pitch > 89)
+		pitch = 89;
+	else if (pitch < -89)
+		pitch = -89;
+
+	// Calculate the spherical offset based on yaw and pitch
 	Vector offset;
-	offset.x = -distance * cos(radians(yaw));  // Negative to move behind
-	offset.z = -distance * sin(radians(yaw));  // Negative to move behind
+	offset.x = -distance * cos(radians(yaw)) * cos(radians(pitch)); // Horizontal distance
+	offset.z = -distance * sin(radians(yaw)) * cos(radians(pitch)); // Depth distance
+	offset.y = height - distance * sin(radians(pitch));             // Vertical offset
 
-	// Adjust height based on pitch, but limit the vertical range
-	float verticalOffset = height + sin(radians(-pitch)) * 2.0f; // Scale the height by pitch
-	offset.y = verticalOffset;
-
-	// Ensure pitch is clamped to prevent over-rotation (for third-person)
-	if (pitch > 89.0f) pitch = 89.0f; // Limit upward pitch
-	if (pitch < -89.0f) pitch = -89.0f; // Limit downward pitch
-
-	// Set camera position (Eye) to player's position + offset
+	// Set the camera position (Eye) to the player's position + offset
 	Vector cameraPosition = Eye + offset;
 
-	// The camera looks at the player's position (target)
+	// Target is the player's position
 	Vector target = Eye;
+
 
 	// Update the view
 	glLoadIdentity();
 	gluLookAt(
 		cameraPosition.x, cameraPosition.y, cameraPosition.z, // Camera position
-		target.x, target.y, target.z,                        // Look at player
-		0.0f, 1.0f, 0.0f                                     // Up vector
+		target.x, target.y, target.z,                        // Look at the player
+		Up.x, Up.y, Up.z                   // Up vector
 	);
 }
 
