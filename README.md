@@ -9,7 +9,7 @@
 
 ## Preview
 Check out the preview video by clicking the link below:  
- [Watch the Preview Video](#) <!-- Replace # with actual link -->
+ [Watch the Preview Video](https://drive.google.com/file/d/1D5UP_Z0NSHsAJOiN-6yi4uxrWlck9APB/view?usp=sharing) <!-- Replace # with actual link -->
 
 ## Technologies Used
 - C++
